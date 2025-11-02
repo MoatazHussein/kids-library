@@ -9,8 +9,9 @@ public class AppDbContext : IdentityDbContext<AppUser, AppRole, string>
     public AppDbContext(DbContextOptions<AppDbContext> options)
         : base(options) { }
 
+    public DbSet<CustomStory> CustomStories { get; set; }
+    public DbSet<CustomStoryItem> CustomStoryItems { get; set; }
 
-   
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder); 

@@ -7,5 +7,6 @@ public class EnsureStorageFoldersTask(IStorageService storageService) : IStartup
     public async Task ExecuteAsync(CancellationToken cancellationToken = default)
     {
         await storageService.EnsureImageDirectoryExistsAsync(cancellationToken);
+        await storageService.EnsureFileDirectoryExistsAsync(cancellationToken);
     }
 }
