@@ -9,14 +9,14 @@ namespace Salhia.KidsLibrary.API.Controllers;
 [Route("api/[controller]")]
 public class UploadController(IMediator mediator) : ControllerBase
 {
-    [HttpPost("image")]
+    [HttpPost("UploadImage")]
     public async Task<IActionResult> UploadImage([FromForm] UploadImageCommand command)
     {
         var url = await mediator.Send(command);
         return Ok(new { url });
     }
 
-    [HttpPost("file")]
+    [HttpPost("UploadFile")]
     public async Task<IActionResult> UploadFile([FromForm] UploadFileCommand command)
     {
         var url = await mediator.Send(command);

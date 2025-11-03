@@ -80,6 +80,9 @@ public sealed class UserService(UserManager<AppUser> userManager, SignInManager<
         {
             Id = user.Id,
             Email = user.Email,
+            FirstName = user.FirstName,     
+            LastName =user.LastName,
+            PhoneNumber = user.PhoneNumber,
         };
     }
 
@@ -227,9 +230,9 @@ public sealed class UserService(UserManager<AppUser> userManager, SignInManager<
         return token;
     }
 
-    public async Task<bool> IsEmailConfirmedAsync(string userId, CancellationToken ct = default)
+    public async Task<bool> IsEmailConfirmedAsync(string email, CancellationToken ct = default)
     {
-        var user = await userManager.FindByIdAsync(userId.ToString());
+        var user = await userManager.FindByEmailAsync(email);
         if (user is null) return false;
         return await userManager.IsEmailConfirmedAsync(user);
     }
