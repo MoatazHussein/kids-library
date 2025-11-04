@@ -10,4 +10,7 @@ public class StoryCategory : BaseEntity
     public string? Description { get; set; }
 
     public string? ImageUrl { get; set; }
+
+    // Navigation property
+    public ICollection<MasterStory> MasterStories { get; set; } = [];
 }

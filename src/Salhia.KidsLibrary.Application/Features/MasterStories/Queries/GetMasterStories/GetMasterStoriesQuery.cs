@@ -1,0 +1,16 @@
+using MediatR;
+using Salhia.KidsLibrary.Application.Common.Models;
+
+namespace Salhia.KidsLibrary.Application.Features.MasterStories.Queries.GetMasterStories;
+
+public class GetMasterStoriesQuery : IRequest<PagedResult<GetMasterStoriesQueryResponse>>
+{
+    public string? StoryCategoryId { get; set; }
+    public string? SearchPhrase { get; set; }
+    public string? CreatedBy { get; set; }
+    public bool? IsApproved { get; set; }
+    public string? OrderBy { get; set; }
+    public bool Descending { get; set; } = true;
+    public int PageNumber { get; set; } = 1;
+    public int PageSize { get; set; } = 10;
+}
