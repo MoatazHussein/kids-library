@@ -41,6 +41,11 @@ public class GetMasterStoriesQueryHandler(
         {
             predicate = predicate.And(x => x.IsApproved == request.IsApproved.Value);
         }
+        else
+        {
+            // By default, only approved stories
+            predicate = predicate.And(x => x.IsApproved);
+        }
 
         // Search in title and content
         if (!string.IsNullOrWhiteSpace(request.SearchPhrase))
@@ -71,7 +76,9 @@ public class GetMasterStoriesQueryHandler(
             Descending = request.Descending,
             Includes = [
                 ms => ms.StoryCategory!,
-                ms => ms.Author!
+                ms => ms.Author!,
+                ms => ms.MediaItems,
+                ms => ms.Comments
             ]
         };
 

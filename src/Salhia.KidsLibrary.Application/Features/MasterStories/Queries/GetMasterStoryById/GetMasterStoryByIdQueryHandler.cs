@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Salhia.KidsLibrary.Application.Common.Interfaces;
 using Salhia.KidsLibrary.Application.Common.Models;
 using Salhia.KidsLibrary.Application.Features.MediaItems.Queries.GetMediaItems;
+using Salhia.KidsLibrary.Application.Features.StoryComments.Queries.GetStoryComments;
 using Salhia.KidsLibrary.Domain.Entities;
 using Salhia.KidsLibrary.Domain.Exceptions;
 
@@ -13,6 +14,7 @@ namespace Salhia.KidsLibrary.Application.Features.MasterStories.Queries.GetMaste
 public class GetMasterStoryByIdQueryHandler(
     IRepository<MasterStory> masterStoryRepository,
     IRepository<MediaItem> mediaItemRepository,
+    IRepository<StoryComment> commentRepository,
     ILogger<GetMasterStoryByIdQueryHandler> logger,
     IMapper mapper,
     ITimeZoneConverter timeZoneConverter
@@ -69,6 +71,36 @@ public class GetMasterStoryByIdQueryHandler(
             request.MediaItemsPageNumber);
 
         response.MediaItems = pagedMediaItems;
+
+        // Get paged comments for this story
+        Expression<Func<StoryComment, object>> commentsOrderBy = c => c.CreatedAt;
+
+        var commentsParameters = new QueryParameters<StoryComment>
+        {
+            PageNumber = request.CommentsPageNumber,
+            PageSize = request.CommentsPageSize,
+            Filter = c => c.MasterStoryId == request.Id,
+            OrderBy = commentsOrderBy,
+            Descending = true, // Newest first
+            Includes = [
+                c => c.CreatedByUser!,
+                c => c.UpdatedByUser!
+            ]
+        };
+
+        var (comments, totalCommentsCount) = await commentRepository.GetAllMatchingAsync(
+            commentsParameters, 
+            cancellationToken);
+
+        var commentDtos = comments.Select(c => mapper.Map<GetStoryCommentsQueryResponse>(c)).ToList();
+
+        var pagedComments = new PagedResult<GetStoryCommentsQueryResponse>(
+            commentDtos,
+            totalCommentsCount,
+            request.CommentsPageSize,
+            request.CommentsPageNumber);
+
+        response.Comments = pagedComments;
 
         return timeZoneConverter.ConvertUtcToLocal(response);
     }

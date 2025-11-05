@@ -17,5 +17,13 @@ public class GetMasterStoryByIdQueryValidator : AbstractValidator<GetMasterStory
         RuleFor(x => x.MediaItemsPageSize)
             .GreaterThanOrEqualTo(1)
             .WithMessage("Media Items page size must be at least 1");
+
+        RuleFor(x => x.CommentsPageNumber)
+            .GreaterThanOrEqualTo(1)
+            .WithMessage("Comments page number must be at least 1");
+
+        RuleFor(x => x.CommentsPageSize)
+            .GreaterThanOrEqualTo(1)
+            .WithMessage("Comments page size must be at least 1");
     }
 }

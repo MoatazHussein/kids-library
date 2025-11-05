@@ -1,5 +1,6 @@
 using Salhia.KidsLibrary.Application.Common.Models;
 using Salhia.KidsLibrary.Application.Features.MediaItems.Queries.GetMediaItems;
+using Salhia.KidsLibrary.Application.Features.StoryComments.Queries.GetStoryComments;
 
 namespace Salhia.KidsLibrary.Application.Features.MasterStories.Queries.GetMasterStoryById;
 
@@ -24,4 +25,7 @@ public class GetMasterStoryByIdQueryResponse
     
     // Paged Media Items
     public PagedResult<GetMediaItemsQueryResponse> MediaItems { get; set; } = null!;
+    
+    // Paged Comments
+    public PagedResult<GetStoryCommentsQueryResponse> Comments { get; set; } = null!;
 }

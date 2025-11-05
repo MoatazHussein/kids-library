@@ -17,9 +17,10 @@ public class MasterStory : BaseEntity
 
     // Navigation property
     public StoryCategory StoryCategory { get; set; } = default!;
-    public AppUser? Author { get; set; }
+    public AppUser Author { get; set; } = default!;
     public AppUser? UpdatedByUser { get; set; }
 
     public ICollection<MediaItem> MediaItems { get; set; } = [];
+    public ICollection<StoryComment> Comments { get; set; } = [];
 
 }

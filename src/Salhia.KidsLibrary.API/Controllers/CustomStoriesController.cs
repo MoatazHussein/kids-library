@@ -7,53 +7,52 @@ using Salhia.KidsLibrary.Application.Features.CustomStories.Commands.UpdateCusto
 using Salhia.KidsLibrary.Application.Features.CustomStories.Queries.GetCustomStories;
 using Salhia.KidsLibrary.Application.Features.CustomStories.Queries.GetCustomStoryById;
 
-namespace Salhia.KidsLibrary.API.Controllers
+namespace Salhia.KidsLibrary.API.Controllers;
+
+[ApiController]
+[Route("api/[Controller]")]
+[Authorize]
+public class CustomStoriesController(IMediator mediator) : ControllerBase
 {
-    [ApiController]
-    [Route("api/[Controller]")]
-    [Authorize]
-    public class CustomStoriesController(IMediator mediator) : ControllerBase
+    [AllowAnonymous]
+    [HttpPost("GetById")]
+    public async Task<IActionResult> GetById(GetCustomStoryByIdQuery query)
     {
-        [AllowAnonymous]
-        [HttpPost("GetById")]
-        public async Task<IActionResult> GetById(GetCustomStoryByIdQuery query)
-        {
-            var customStory = await mediator.Send(query);
-            return Ok(customStory);
-        }
+        var customStory = await mediator.Send(query);
+        return Ok(customStory);
+    }
 
-        [AllowAnonymous]
-        [HttpPost("GetAllMatching")]
-        public async Task<IActionResult> GetAllMatching([FromBody] GetCustomStoriesQuery query)
-        {
-            var customStories = await mediator.Send(query);
-            return Ok(customStories);
-        }
+    [AllowAnonymous]
+    [HttpPost("GetAllMatching")]
+    public async Task<IActionResult> GetAllMatching([FromBody] GetCustomStoriesQuery query)
+    {
+        var customStories = await mediator.Send(query);
+        return Ok(customStories);
+    }
 
-        [HttpPost("Add")]
-        //[Authorize(Roles = UserRoles.Admin)]
-        public async Task<IActionResult> Add(AddCustomStoryCommand command)
-        {
-            string id = await mediator.Send(command);
-            return StatusCode(201, $"Added successfully with Id {id}");
-        }
+    [HttpPost("Add")]
+    //[Authorize(Roles = UserRoles.Admin)]
+    public async Task<IActionResult> Add(AddCustomStoryCommand command)
+    {
+        string id = await mediator.Send(command);
+        return StatusCode(201, $"Added successfully with Id {id}");
+    }
 
-        [HttpPut("Update")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> Update(UpdateCustomStoryCommand command)
-        {
-            await mediator.Send(command);
-            return StatusCode(200, $"Updated successfully");
-        }
+    [HttpPut("Update")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Update(UpdateCustomStoryCommand command)
+    {
+        await mediator.Send(command);
+        return StatusCode(200, $"Updated successfully");
+    }
 
-        [HttpDelete("Delete/{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> Delete([FromRoute] string id)
-        {
-            await mediator.Send(new DeleteCustomStoryCommand { Id = id });
-            return StatusCode(200, $"Deleted successfully");
-        }
+    [HttpDelete("Delete/{id}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Delete([FromRoute] string id)
+    {
+        await mediator.Send(new DeleteCustomStoryCommand { Id = id });
+        return StatusCode(200, $"Deleted successfully");
     }
 }

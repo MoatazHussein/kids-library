@@ -14,6 +14,8 @@ public class AppDbContext : IdentityDbContext<AppUser, AppRole, string>
     public DbSet<StoryCategory> StoryCategories { get; set; }
     public DbSet<MasterStory> MasterStories { get; set; }
     public DbSet<MediaItem> MediaItems { get; set; }
+    public DbSet<StoryComment> StoryComments { get; set; }
+    public DbSet<FavoriteStory> FavoriteStories { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

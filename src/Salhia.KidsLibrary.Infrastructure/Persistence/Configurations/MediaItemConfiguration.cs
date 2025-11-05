@@ -38,7 +38,7 @@ public class MediaItemConfiguration : IEntityTypeConfiguration<MediaItem>
 
         // Relationship: Many MediaItems belong to One MasterStory
         builder.HasOne(mi => mi.MasterStory)
-            .WithMany()
+            .WithMany(ms => ms.MediaItems)
             .HasForeignKey(mi => mi.MasterStoryId)
             .OnDelete(DeleteBehavior.Cascade);
 

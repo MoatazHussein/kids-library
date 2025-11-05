@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Salhia.KidsLibrary.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using Salhia.KidsLibrary.Infrastructure.Persistence;
 namespace Salhia.KidsLibrary.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251105205832_AddStoryComment")]
+    partial class AddStoryComment
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -357,53 +360,6 @@ namespace Salhia.KidsLibrary.Infrastructure.Migrations
                     b.ToTable("CustomStoryItems");
                 });
 
-            modelBuilder.Entity("Salhia.KidsLibrary.Domain.Entities.FavoriteStory", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasMaxLength(26)
-                        .HasColumnType("nvarchar(26)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasMaxLength(26)
-                        .HasColumnType("nvarchar(26)");
-
-                    b.Property<string>("MasterStoryId")
-                        .IsRequired()
-                        .HasMaxLength(26)
-                        .HasColumnType("nvarchar(26)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasMaxLength(26)
-                        .HasColumnType("nvarchar(26)");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasMaxLength(26)
-                        .HasColumnType("nvarchar(26)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedAt");
-
-                    b.HasIndex("Id");
-
-                    b.HasIndex("MasterStoryId");
-
-                    b.HasIndex("UserId");
-
-                    b.HasIndex("UserId", "MasterStoryId")
-                        .IsUnique();
-
-                    b.ToTable("FavoriteStories");
-                });
-
             modelBuilder.Entity("Salhia.KidsLibrary.Domain.Entities.MasterStory", b =>
                 {
                     b.Property<string>("Id")
@@ -490,6 +446,9 @@ namespace Salhia.KidsLibrary.Infrastructure.Migrations
                         .HasMaxLength(26)
                         .HasColumnType("nvarchar(26)");
 
+                    b.Property<string>("MasterStoryId1")
+                        .HasColumnType("nvarchar(26)");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -516,6 +475,8 @@ namespace Salhia.KidsLibrary.Infrastructure.Migrations
                     b.HasIndex("Id");
 
                     b.HasIndex("MasterStoryId");
+
+                    b.HasIndex("MasterStoryId1");
 
                     b.HasIndex("Title");
 
@@ -710,25 +671,6 @@ namespace Salhia.KidsLibrary.Infrastructure.Migrations
                     b.Navigation("UpdatedByUser");
                 });
 
-            modelBuilder.Entity("Salhia.KidsLibrary.Domain.Entities.FavoriteStory", b =>
-                {
-                    b.HasOne("Salhia.KidsLibrary.Domain.Entities.MasterStory", "MasterStory")
-                        .WithMany()
-                        .HasForeignKey("MasterStoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Salhia.KidsLibrary.Domain.Entities.AppUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("MasterStory");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Salhia.KidsLibrary.Domain.Entities.MasterStory", b =>
                 {
                     b.HasOne("Salhia.KidsLibrary.Domain.Entities.AppUser", "Author")
@@ -764,10 +706,14 @@ namespace Salhia.KidsLibrary.Infrastructure.Migrations
                         .IsRequired();
 
                     b.HasOne("Salhia.KidsLibrary.Domain.Entities.MasterStory", "MasterStory")
-                        .WithMany("MediaItems")
+                        .WithMany()
                         .HasForeignKey("MasterStoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Salhia.KidsLibrary.Domain.Entities.MasterStory", null)
+                        .WithMany("MediaItems")
+                        .HasForeignKey("MasterStoryId1");
 
                     b.HasOne("Salhia.KidsLibrary.Domain.Entities.AppUser", "UpdatedByUser")
                         .WithMany()
