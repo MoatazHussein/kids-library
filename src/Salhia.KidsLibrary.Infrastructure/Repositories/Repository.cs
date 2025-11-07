@@ -31,6 +31,20 @@ public class Repository<T> : IRepository<T> where T : class
         // Assume entities have an Id property of type object
         return query.FirstOrDefaultAsync(e => EF.Property<object>(e, "Id") == id, cancellationToken);
     }
+
+    public Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default, params Expression<Func<T, object>>[] includes)
+    {
+        IQueryable<T> query = _dbSet.AsNoTracking();
+
+        // Apply eager loading for includes
+        foreach (var include in includes)
+        {
+            query = query.Include(include);
+        }
+
+        return query.FirstOrDefaultAsync(predicate, cancellationToken);
+    }
+
     public async Task<bool> AnyAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)
     {
         return await _context.Set<T>().AnyAsync(predicate, cancellationToken);

@@ -5,12 +5,14 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using Salhia.KidsLibrary.Application.Common.Interfaces;
 using Salhia.KidsLibrary.Application.Common.Models;
+using Salhia.KidsLibrary.Application.Services.MasterStoryStatsService;
 using Salhia.KidsLibrary.Domain.Entities;
 
 namespace Salhia.KidsLibrary.Application.Features.MasterStories.Queries.GetMasterStories;
 
 public class GetMasterStoriesQueryHandler(
     IRepository<MasterStory> repository,
+    IMasterStoryStatsService statsService,
     ILogger<GetMasterStoriesQueryHandler> logger,
     IMapper mapper,
     ITimeZoneConverter timeZoneConverter
@@ -85,6 +87,20 @@ public class GetMasterStoriesQueryHandler(
         var (masterStories, totalCount) = await repository.GetAllMatchingAsync(parameters, cancellationToken);
 
         var masterStoryDtos = masterStories.Select(ms => mapper.Map<GetMasterStoriesQueryResponse>(ms)).ToList();
+
+        // Get stats for all stories in this page using service
+        var storyIds = masterStoryDtos.Select(ms => ms.Id).ToList();
+        var statsDict = await statsService.GetMultipleStoryRatingStatsAsync(storyIds, cancellationToken);
+
+        // Map stats to each story
+        foreach (var story in masterStoryDtos)
+        {
+            if (statsDict.TryGetValue(story.Id, out var stats))
+            {
+                story.RatingsCount = stats.RatingsCount;
+                story.AverageRating = stats.AverageRating;
+            }
+        }
 
         var result = new PagedResult<GetMasterStoriesQueryResponse>(
             masterStoryDtos, 

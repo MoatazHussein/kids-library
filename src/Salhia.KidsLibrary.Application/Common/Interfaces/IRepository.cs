@@ -7,6 +7,7 @@ namespace Salhia.KidsLibrary.Application.Common.Interfaces;
 public interface IRepository<T> where T : class
 {
     Task<T?> GetByIdAsync(object id, CancellationToken cancellationToken = default,  params Expression<Func<T, object>>[] includes);
+    Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default, params Expression<Func<T, object>>[] includes);
     Task<bool> AnyAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default);
     Task<List<T>> GetAllAsync(Expression<Func<T, bool>> predicate,CancellationToken cancellationToken = default,params Expression<Func<T, object>>[] includes);
     Task<(IEnumerable<T>, int)> GetAllMatchingAsync(QueryParameters<T> parameters, CancellationToken cancellationToken = default);

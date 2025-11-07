@@ -50,6 +50,7 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<IStorageService, StorageService>();
         services.AddScoped<IStartupTask, EnsureStorageFoldersTask>();
+        
 
 
     }

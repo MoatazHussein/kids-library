@@ -6,6 +6,7 @@ using Salhia.KidsLibrary.Application.Common.Interfaces;
 using Salhia.KidsLibrary.Application.Common.Models;
 using Salhia.KidsLibrary.Application.Features.MediaItems.Queries.GetMediaItems;
 using Salhia.KidsLibrary.Application.Features.StoryComments.Queries.GetStoryComments;
+using Salhia.KidsLibrary.Application.Services.MasterStoryStatsService;
 using Salhia.KidsLibrary.Domain.Entities;
 using Salhia.KidsLibrary.Domain.Exceptions;
 
@@ -15,6 +16,7 @@ public class GetMasterStoryByIdQueryHandler(
     IRepository<MasterStory> masterStoryRepository,
     IRepository<MediaItem> mediaItemRepository,
     IRepository<StoryComment> commentRepository,
+    IMasterStoryStatsService statsService,
     ILogger<GetMasterStoryByIdQueryHandler> logger,
     IMapper mapper,
     ITimeZoneConverter timeZoneConverter
@@ -101,6 +103,11 @@ public class GetMasterStoryByIdQueryHandler(
             request.CommentsPageNumber);
 
         response.Comments = pagedComments;
+
+        // Get rating statistics using service
+        var (ratingsCount, averageRating) = await statsService.GetStoryRatingStatsAsync(request.Id, cancellationToken);
+        response.RatingsCount = ratingsCount;
+        response.AverageRating = averageRating;
 
         return timeZoneConverter.ConvertUtcToLocal(response);
     }

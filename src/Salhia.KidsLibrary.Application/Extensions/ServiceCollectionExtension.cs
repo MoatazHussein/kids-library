@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.Extensions.DependencyInjection;
-using Salhia.KidsLibrary.Application.Features.Users;
+using Salhia.KidsLibrary.Application.Services.MasterStoryStatsService;
 
 namespace Salhia.KidsLibrary.Application.Extensions;
 
@@ -18,6 +18,9 @@ public static class ServiceCollectionExtensions
 
         services.AddValidatorsFromAssembly(applicationAssembly)
            .AddFluentValidationAutoValidation();
+
+
+        services.AddScoped<IMasterStoryStatsService,MasterStoryStatsService>();
 
     }
 }

@@ -28,4 +28,8 @@ public class GetMasterStoryByIdQueryResponse
     
     // Paged Comments
     public PagedResult<GetStoryCommentsQueryResponse> Comments { get; set; } = null!;
+    
+    // Rating Statistics
+    public int RatingsCount { get; set; }
+    public decimal? AverageRating { get; set; } // Calculated: RatingsSum / RatingsCount
 }

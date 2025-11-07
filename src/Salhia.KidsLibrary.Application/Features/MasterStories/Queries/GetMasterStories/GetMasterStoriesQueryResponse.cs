@@ -20,4 +20,8 @@ public class GetMasterStoriesQueryResponse
     // Counts
     public int MediaItemsCount { get; set; }
     public int CommentsCount { get; set; }
+    
+    // Rating Statistics
+    public int RatingsCount { get; set; }
+    public decimal? AverageRating { get; set; } // Calculated: RatingsSum / RatingsCount
 }

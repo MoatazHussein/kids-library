@@ -1,0 +1,167 @@
+using Microsoft.Extensions.Logging;
+using Salhia.KidsLibrary.Application.Common.Interfaces;
+using Salhia.KidsLibrary.Application.Common.Interfaces.Security;
+using Salhia.KidsLibrary.Application.Common.Models;
+using Salhia.KidsLibrary.Domain.Entities;
+
+namespace Salhia.KidsLibrary.Application.Services.MasterStoryStatsService;
+
+public class MasterStoryStatsService(
+    IRepository<MasterStoryStats> statsRepository,
+    ILogger<MasterStoryStatsService> logger,
+    ICurrentUserService currentUserService
+    ) : IMasterStoryStatsService
+{
+    public async Task IncrementRatingAsync(string storyId, int ratingValue, CancellationToken cancellationToken = default)
+    {
+        logger.LogInformation("Incrementing rating stats for story {StoryId} with value {Rating}", storyId, ratingValue);
+
+        var stats = await statsRepository.FirstOrDefaultAsync(e => e.MasterStoryId == storyId, cancellationToken);
+
+        if (stats is null)
+        {
+            // Create new stats record
+            stats = new MasterStoryStats
+            {
+                MasterStoryId = storyId,
+                RatingsCount = 1,
+                RatingsSum = ratingValue,
+                CreatedAt = DateTime.UtcNow,
+                CreatedBy = currentUserService.UserId
+            };
+            await statsRepository.AddAsync(stats, cancellationToken);
+            logger.LogInformation("Created new stats record for story {StoryId}", storyId);
+        }
+        else
+        {
+            // Update existing stats
+            stats.RatingsCount++;
+            stats.RatingsSum += ratingValue;
+            stats.UpdatedAt = DateTime.UtcNow;
+            stats.UpdatedBy = currentUserService.UserId;
+
+            await statsRepository.UpdateAsync(stats);
+            logger.LogInformation("Updated stats: Count={Count}, Sum={Sum}, Avg={Avg:F2}",
+                stats.RatingsCount, stats.RatingsSum, (decimal)stats.RatingsSum / stats.RatingsCount);
+        }
+    }
+
+    public async Task UpdateRatingAsync(string storyId, int oldRating, int newRating, CancellationToken cancellationToken = default)
+    {
+        logger.LogInformation("Updating rating stats for story {StoryId} from {OldRating} to {NewRating}",
+            storyId, oldRating, newRating);
+
+        var stats = await statsRepository.FirstOrDefaultAsync(e=> e.MasterStoryId == storyId, cancellationToken);
+
+        if (stats is not null)
+        {
+            var ratingDifference = newRating - oldRating;
+            stats.RatingsSum += ratingDifference;
+            stats.UpdatedAt = DateTime.UtcNow;
+            stats.UpdatedBy = currentUserService.UserId;
+
+            await statsRepository.UpdateAsync(stats);
+            logger.LogInformation("Updated stats: Sum adjusted by {Difference}, new Sum={Sum}, Avg={Avg:F2}",
+                ratingDifference, stats.RatingsSum, (decimal)stats.RatingsSum / stats.RatingsCount);
+        }
+        else
+        {
+            // Fallback: create stats if missing (shouldn't happen in normal flow)
+            logger.LogWarning("Stats not found for story {StoryId}, creating new record", storyId);
+            stats = new MasterStoryStats
+            {
+                MasterStoryId = storyId,
+                RatingsCount = 1,
+                RatingsSum = newRating,
+                CreatedAt = DateTime.UtcNow,
+                CreatedBy = currentUserService.UserId
+            };
+            await statsRepository.AddAsync(stats, cancellationToken);
+        }
+    }
+
+    public async Task DecrementRatingAsync(string storyId, int ratingValue, CancellationToken cancellationToken = default)
+    {
+        logger.LogInformation("Decrementing rating stats for story {StoryId} with value {Rating}", storyId, ratingValue);
+
+        var stats = await statsRepository.FirstOrDefaultAsync(e => e.MasterStoryId == storyId, cancellationToken);
+
+        if (stats is not null)
+        {
+            stats.RatingsCount--;
+            stats.RatingsSum -= ratingValue;
+            stats.UpdatedAt = DateTime.UtcNow;
+            stats.UpdatedBy = currentUserService.UserId;
+
+            if (stats.RatingsCount <= 0)
+            {
+                // Delete stats record if no ratings remain
+                await statsRepository.DeleteAsync(stats);
+                logger.LogInformation("Deleted stats record for story {StoryId} (no ratings remain)", storyId);
+            }
+            else
+            {
+                await statsRepository.UpdateAsync(stats);
+                logger.LogInformation("Updated stats: Count={Count}, Sum={Sum}, Avg={Avg:F2}",
+                    stats.RatingsCount, stats.RatingsSum, (decimal)stats.RatingsSum / stats.RatingsCount);
+            }
+        }
+        else
+        {
+            logger.LogWarning("Stats not found for story {StoryId} when decrementing rating", storyId);
+        }
+    }
+
+    public async Task<(int RatingsCount, decimal? AverageRating)> GetStoryRatingStatsAsync(
+        string storyId,
+        CancellationToken cancellationToken = default)
+    {
+        logger.LogInformation("Getting rating stats for story {StoryId}", storyId);
+
+        var stats = await statsRepository.FirstOrDefaultAsync(e => e.MasterStoryId == storyId, cancellationToken);
+
+        if (stats is null || stats.RatingsCount == 0)
+        {
+            return (0, null);
+        }
+
+        var averageRating = Math.Round((decimal)stats.RatingsSum / stats.RatingsCount, 2);
+        return (stats.RatingsCount, averageRating);
+    }
+
+    public async Task<Dictionary<string, (int RatingsCount, decimal? AverageRating)>> GetMultipleStoryRatingStatsAsync(
+        List<string> storyIds,
+        CancellationToken cancellationToken = default)
+    {
+        logger.LogInformation("Getting rating stats for {Count} stories", storyIds.Count);
+
+        var parameters = new QueryParameters<MasterStoryStats>
+        {
+            Filter = stat => storyIds.Contains(stat.MasterStoryId)
+        };
+
+        var (statsList, _) = await statsRepository.GetAllMatchingAsync(parameters, cancellationToken);
+
+        var result = new Dictionary<string, (int RatingsCount, decimal? AverageRating)>();
+
+        foreach (var stat in statsList)
+        {
+            var averageRating = stat.RatingsCount > 0
+                ? Math.Round((decimal)stat.RatingsSum / stat.RatingsCount, 2)
+                : (decimal?)null;
+
+            result[stat.MasterStoryId] = (stat.RatingsCount, averageRating);
+        }
+
+        // Add entries for stories with no stats
+        foreach (var storyId in storyIds)
+        {
+            if (!result.ContainsKey(storyId))
+            {
+                result[storyId] = (0, null);
+            }
+        }
+
+        return result;
+    }
+}

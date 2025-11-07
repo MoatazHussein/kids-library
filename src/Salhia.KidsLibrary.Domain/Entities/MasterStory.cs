@@ -22,5 +22,6 @@ public class MasterStory : BaseEntity
 
     public ICollection<MediaItem> MediaItems { get; set; } = [];
     public ICollection<StoryComment> Comments { get; set; } = [];
+    public ICollection<StoryRating> Ratings { get; set; } = [];
 
 }
