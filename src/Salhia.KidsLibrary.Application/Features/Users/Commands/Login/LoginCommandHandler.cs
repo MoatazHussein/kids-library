@@ -28,6 +28,8 @@ public class LoginCommandHandler(IUserService userService, IJwtService jwtServic
         return new LoginResponseDto
         {
             Email = user.Email!,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
             PhoneNumber = user.PhoneNumber!,
             Token = token,
             UserTypeValue = userTypeValue,
