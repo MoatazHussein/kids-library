@@ -7,8 +7,8 @@ namespace Salhia.KidsLibrary.Application.Features.MasterStories.Queries.GetMaste
 public class GetMasterStoriesQuery : IRequest<PagedResult<GetMasterStoriesQueryResponse>>
 {
     public string? StoryCategoryId { get; set; }
+    public MediaType? MediaType { get; set; }
     public string? SearchPhrase { get; set; }
-    public string? CreatedBy { get; set; }
     public ApprovalStatus? ApprovalStatus { get; set; }
     public string? OrderBy { get; set; }
     public bool Descending { get; set; } = true;

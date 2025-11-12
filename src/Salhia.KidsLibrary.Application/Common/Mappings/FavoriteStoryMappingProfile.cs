@@ -21,12 +21,14 @@ public class FavoriteStoryMappingProfile : Profile
             .ForMember(dest => dest.StoryCategoryTitle, opt => opt.MapFrom(src => src.MasterStory.StoryCategory != null ? src.MasterStory.StoryCategory.Title : null))
             .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.MasterStory.Title))
             .ForMember(dest => dest.Content, opt => opt.MapFrom(src => src.MasterStory.Content))
-            .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.MasterStory.ImageUrl))
+            .ForMember(dest => dest.CoverImageUrl, opt => opt.MapFrom(src => src.MasterStory.CoverImageUrl))
+            .ForMember(dest => dest.MediaType, opt => opt.MapFrom(src => src.MasterStory.MediaType))
+            .ForMember(dest => dest.MediaUrl, opt => opt.MapFrom(src => src.MasterStory.MediaUrl))
+            .ForMember(dest => dest.PublishYear, opt => opt.MapFrom(src => src.MasterStory.PublishYear))
             .ForMember(dest => dest.ApprovalStatus, opt => opt.MapFrom(src => src.MasterStory.ApprovalStatus))
             .ForMember(dest => dest.AuthorId, opt => opt.MapFrom(src => src.MasterStory.CreatedBy))
             .ForMember(dest => dest.Author, opt => opt.MapFrom(src => src.MasterStory.Author))
             .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.MasterStory.CreatedAt))
-            .ForMember(dest => dest.MediaItemsCount, opt => opt.MapFrom(src => src.MasterStory.MediaItems.Count))
             .ForMember(dest => dest.CommentsCount, opt => opt.MapFrom(src => src.MasterStory.Comments.Count));
     }
 }

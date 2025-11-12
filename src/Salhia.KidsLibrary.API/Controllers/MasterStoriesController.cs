@@ -2,7 +2,6 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Salhia.KidsLibrary.Application.Features.MasterStories.Commands.AddMasterStory;
-using Salhia.KidsLibrary.Application.Features.MasterStories.Commands.AddMasterStoryWithItems;
 using Salhia.KidsLibrary.Application.Features.MasterStories.Commands.ApproveMasterStory;
 using Salhia.KidsLibrary.Application.Features.MasterStories.Commands.DeleteMasterStory;
 using Salhia.KidsLibrary.Application.Features.MasterStories.Commands.UpdateMasterStory;
@@ -40,17 +39,6 @@ public class MasterStoriesController(IMediator mediator) : ControllerBase
     {
         string id = await mediator.Send(command);
         return StatusCode(201, $"Added successfully with Id {id}");
-    }
-
-    [HttpPost("AddWithItems")]
-    //[Authorize(Roles = UserRoles.Admin)]
-    [ProducesResponseType(StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> AddWithItems(AddMasterStoryWithItemsCommand command)
-    {
-        string id = await mediator.Send(command);
-        return StatusCode(201, new { Id = id, Message = "Master story with items added successfully" });
     }
 
     [HttpPut("Update")]

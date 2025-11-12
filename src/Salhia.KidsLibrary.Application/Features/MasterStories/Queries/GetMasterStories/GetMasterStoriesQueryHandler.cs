@@ -33,10 +33,10 @@ public class GetMasterStoriesQueryHandler(
             predicate = predicate.And(x => x.StoryCategoryId == request.StoryCategoryId);
         }
 
-        // Filter by creator/author
-        if (!string.IsNullOrWhiteSpace(request.CreatedBy))
+        // Filter by Media Type 
+        if (request.MediaType.HasValue)
         {
-            predicate = predicate.And(x => x.CreatedBy == request.CreatedBy);
+            predicate = predicate.And(x => x.MediaType == request.MediaType);
         }
 
         // Filter by approval status
@@ -50,13 +50,19 @@ public class GetMasterStoriesQueryHandler(
             predicate = predicate.And(x => x.ApprovalStatus == ApprovalStatus.Approved);
         }
 
-        // Search in title and content
+        // Search in title, content, author, publish year, and media items
         if (!string.IsNullOrWhiteSpace(request.SearchPhrase))
         {
             var search = request.SearchPhrase.Trim().ToLower();
-            predicate = predicate.And(x => 
-                x.Title.ToLower().Contains(search) || 
-                (x.Content != null && x.Content.ToLower().Contains(search)));
+            var searchPredicate = PredicateBuilder.New<MasterStory>(false);
+            
+            searchPredicate = searchPredicate.Or(x => x.Title.ToLower().Contains(search));
+            searchPredicate = searchPredicate.Or(x => x.Content != null && x.Content.ToLower().Contains(search));
+            searchPredicate = searchPredicate.Or(x => x.Author.FirstName.ToLower().Contains(search));
+            searchPredicate = searchPredicate.Or(x => x.Author.LastName != null && x.Author.LastName.ToLower().Contains(search));
+            searchPredicate = searchPredicate.Or(x => x.PublishYear.HasValue && x.PublishYear.ToString()!.Contains(search));
+            
+            predicate = predicate.And(searchPredicate);
         }
 
         Expression<Func<MasterStory, bool>> filter = predicate;
@@ -81,7 +87,6 @@ public class GetMasterStoriesQueryHandler(
                 ms => ms.StoryCategory!,
                 ms => ms.Author!,
                 ms => ms.UpdatedByUser!,
-                ms => ms.MediaItems,
                 ms => ms.Comments
             ]
         };

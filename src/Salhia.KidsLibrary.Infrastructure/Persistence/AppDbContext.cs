@@ -13,7 +13,6 @@ public class AppDbContext : IdentityDbContext<AppUser, AppRole, string>
     public DbSet<CustomStoryItem> CustomStoryItems { get; set; }
     public DbSet<StoryCategory> StoryCategories { get; set; }
     public DbSet<MasterStory> MasterStories { get; set; }
-    public DbSet<MediaItem> MediaItems { get; set; }
     public DbSet<StoryComment> StoryComments { get; set; }
     public DbSet<FavoriteStory> FavoriteStories { get; set; }
     public DbSet<StoryRating> StoryRatings { get; set; }

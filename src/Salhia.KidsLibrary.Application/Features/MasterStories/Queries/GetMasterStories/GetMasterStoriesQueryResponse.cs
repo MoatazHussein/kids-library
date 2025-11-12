@@ -10,7 +10,12 @@ public class GetMasterStoriesQueryResponse
     public string? StoryCategoryTitle { get; set; }
     public string Title { get; set; } = string.Empty;
     public string? Content { get; set; }
-    public string? ImageUrl { get; set; }
+    public string? CoverImageUrl { get; set; }
+    public MediaType MediaType { get; set; }
+    public int MediaTypeValue => (int)MediaType;
+    public string MediaTypeName => MediaType.ToString();
+    public string MediaUrl { get; set; } = string.Empty;
+    public int? PublishYear { get; set; }
     public ApprovalStatus ApprovalStatus { get; set; }
     
     public string CreatedBy { get; set; } = string.Empty;

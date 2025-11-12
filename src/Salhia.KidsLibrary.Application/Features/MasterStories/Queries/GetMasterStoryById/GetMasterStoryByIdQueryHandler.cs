@@ -4,7 +4,6 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using Salhia.KidsLibrary.Application.Common.Interfaces;
 using Salhia.KidsLibrary.Application.Common.Models;
-using Salhia.KidsLibrary.Application.Features.MediaItems.Queries.GetMediaItems;
 using Salhia.KidsLibrary.Application.Features.StoryComments.Queries.GetStoryComments;
 using Salhia.KidsLibrary.Application.Services.MasterStoryStatsService;
 using Salhia.KidsLibrary.Domain.Entities;
@@ -14,7 +13,6 @@ namespace Salhia.KidsLibrary.Application.Features.MasterStories.Queries.GetMaste
 
 public class GetMasterStoryByIdQueryHandler(
     IRepository<MasterStory> masterStoryRepository,
-    IRepository<MediaItem> mediaItemRepository,
     IRepository<StoryComment> commentRepository,
     IMasterStoryStatsService statsService,
     ILogger<GetMasterStoryByIdQueryHandler> logger,
@@ -43,36 +41,6 @@ public class GetMasterStoryByIdQueryHandler(
 
         // Map story to response
         var response = mapper.Map<GetMasterStoryByIdQueryResponse>(masterStory);
-
-        // Get paged media items for this story
-        Expression<Func<MediaItem, object>> mediaItemsOrderBy = mi => mi.CreatedAt;
-
-        var mediaItemsParameters = new QueryParameters<MediaItem>
-        {
-            PageNumber = request.MediaItemsPageNumber,
-            PageSize = request.MediaItemsPageSize,
-            Filter = mi => mi.MasterStoryId == request.Id,
-            OrderBy = mediaItemsOrderBy,
-            Descending = true, // Newest first
-            Includes = [
-                mi => mi.CreatedByUser!,
-                mi => mi.UpdatedByUser!
-            ]
-        };
-
-        var (mediaItems, totalMediaItemsCount) = await mediaItemRepository.GetAllMatchingAsync(
-            mediaItemsParameters, 
-            cancellationToken);
-
-        var mediaItemDtos = mediaItems.Select(mi => mapper.Map<GetMediaItemsQueryResponse>(mi)).ToList();
-
-        var pagedMediaItems = new PagedResult<GetMediaItemsQueryResponse>(
-            mediaItemDtos,
-            totalMediaItemsCount,
-            request.MediaItemsPageSize,
-            request.MediaItemsPageNumber);
-
-        response.MediaItems = pagedMediaItems;
 
         // Get paged comments for this story
         Expression<Func<StoryComment, object>> commentsOrderBy = c => c.CreatedAt;

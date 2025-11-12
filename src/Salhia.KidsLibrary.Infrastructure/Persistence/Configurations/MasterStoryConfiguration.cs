@@ -24,8 +24,15 @@ public class MasterStoryConfiguration : IEntityTypeConfiguration<MasterStory>
         builder.Property(ms => ms.Content)
             .HasMaxLength(5000);
 
-        builder.Property(ms => ms.ImageUrl)
+        builder.Property(ms => ms.CoverImageUrl)
             .HasMaxLength(500);
+
+        builder.Property(ms => ms.MediaUrl)
+            .IsRequired()
+            .HasMaxLength(500);
+
+        builder.Property(ms => ms.MediaType)
+            .HasDefaultValue(MediaType.Unknown);
 
         builder.Property(ms => ms.ApprovalStatus)
             .HasDefaultValue(ApprovalStatus.Pending);
@@ -59,12 +66,6 @@ public class MasterStoryConfiguration : IEntityTypeConfiguration<MasterStory>
             .WithMany()
             .HasForeignKey(ms => ms.UpdatedBy)
             .OnDelete(DeleteBehavior.Restrict);
-
-        // MediaItems navigation
-        builder.HasMany(ms => ms.MediaItems)
-            .WithOne(mi => mi.MasterStory)
-            .HasForeignKey(mi => mi.MasterStoryId)
-            .OnDelete(DeleteBehavior.Cascade);
 
         // Indexes
         builder.HasIndex(ms => ms.Id); // For time-based ordering (ULID)

@@ -6,7 +6,6 @@ using Microsoft.Extensions.Logging;
 using Salhia.KidsLibrary.Application.Common.Interfaces;
 using Salhia.KidsLibrary.Application.Common.Interfaces.Security;
 using Salhia.KidsLibrary.Application.Common.Models;
-using Salhia.KidsLibrary.Application.Features.FavoriteStories.Queries.GetFavoriteStories;
 using Salhia.KidsLibrary.Domain.Entities;
 
 namespace Salhia.KidsLibrary.Application.Features.FavoriteStories.Queries.GetFavoriteStories;
@@ -65,7 +64,6 @@ public class GetFavoriteStoriesQueryHandler(
                 fs => fs.MasterStory,
                 fs => fs.MasterStory.StoryCategory,
                 fs => fs.MasterStory.Author!,
-                fs => fs.MasterStory.MediaItems,
                 fs => fs.MasterStory.Comments
             ]
         };

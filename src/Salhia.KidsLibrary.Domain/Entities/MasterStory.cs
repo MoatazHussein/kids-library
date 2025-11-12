@@ -11,7 +11,13 @@ public class MasterStory : BaseEntity
 
     public string? Content { get; set; }
 
-    public string? ImageUrl { get; set; }
+    public string? CoverImageUrl { get; set; }
+
+    public MediaType MediaType { get; set; }
+    public string MediaUrl { get; set; } = default!;    
+    
+    public int? PublishYear { get; set; }
+    
     public ApprovalStatus ApprovalStatus { get; set; }
 
     // Navigation property
@@ -19,7 +25,6 @@ public class MasterStory : BaseEntity
     public AppUser Author { get; set; } = default!;
     public AppUser? UpdatedByUser { get; set; }
 
-    public ICollection<MediaItem> MediaItems { get; set; } = [];
     public ICollection<StoryComment> Comments { get; set; } = [];
     public ICollection<StoryRating> Ratings { get; set; } = [];
 
