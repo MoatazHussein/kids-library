@@ -15,6 +15,8 @@ public class StoryCategoryMappingProfile : Profile
         CreateMap<UpdateStoryCategoryCommand, StoryCategory>();
 
         // Queries
-        CreateMap<StoryCategory, GetStoryCategoriesQueryResponse>();
+        CreateMap<StoryCategory, GetStoryCategoriesQueryResponse>()
+            .ForMember(dest => dest.MasterStoriesCount, opt => opt.MapFrom(src => src.MasterStories.Count));
+
     }
 }

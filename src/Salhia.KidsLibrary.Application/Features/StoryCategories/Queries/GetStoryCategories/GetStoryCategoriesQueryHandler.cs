@@ -47,6 +47,7 @@ public class GetStoryCategoriesQueryHandler(
         var parameters = new QueryParameters<StoryCategory>
         {
             PageNumber = request.PageNumber,
+            Includes = [e=> e.MasterStories],
             PageSize = request.PageSize,
             Filter = filter,
             OrderBy = orderBy,

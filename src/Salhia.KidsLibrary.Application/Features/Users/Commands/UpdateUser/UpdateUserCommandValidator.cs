@@ -15,7 +15,6 @@ public class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>
 
         RuleFor(dto => dto.PhoneNumber)
           .Length(10, 15)
-          .When(dto => !string.IsNullOrEmpty(dto.PhoneNumber))
           .WithMessage("Please provide a valid phone number with country code (10-15 digits)");
 
     }

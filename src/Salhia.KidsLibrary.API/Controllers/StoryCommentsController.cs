@@ -23,7 +23,6 @@ public class StoryCommentsController(IMediator mediator) : ControllerBase
     }
 
     [HttpPost("Add")]
-    [Authorize(Roles = UserRoles.Admin)]
     public async Task<IActionResult> Add(AddStoryCommentCommand command)
     {
         string id = await mediator.Send(command);
@@ -31,7 +30,6 @@ public class StoryCommentsController(IMediator mediator) : ControllerBase
     }
 
     [HttpPut("Update")]
-    [Authorize(Roles = UserRoles.Admin)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Update(UpdateStoryCommentCommand command)
@@ -41,7 +39,6 @@ public class StoryCommentsController(IMediator mediator) : ControllerBase
     }
 
     [HttpDelete("Delete/{id}")]
-    [Authorize(Roles = UserRoles.Admin)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete([FromRoute] string id)

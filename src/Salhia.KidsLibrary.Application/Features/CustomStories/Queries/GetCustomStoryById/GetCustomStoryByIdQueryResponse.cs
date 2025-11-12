@@ -1,4 +1,5 @@
 using Salhia.KidsLibrary.Application.Common.Dtos.CustomStories;
+using Salhia.KidsLibrary.Application.Common.Dtos.Users;
 using Salhia.KidsLibrary.Application.Common.Models;
 
 namespace Salhia.KidsLibrary.Application.Features.CustomStories.Queries.GetCustomStoryById;
@@ -12,11 +13,11 @@ public class GetCustomStoryByIdQueryResponse
     public string? ImageUrl { get; set; }
     
     public string CreatedBy { get; set; } = string.Empty;
-    public string? CreatedByUserName { get; set; }
+    public UserInfoDto? CreatedByUser { get; set; }
     public DateTime CreatedAt { get; set; }
     
     public string? UpdatedBy { get; set; }
-    public string? UpdatedByUserName { get; set; }
+    public UserInfoDto? UpdatedByUser { get; set; }
     public DateTime? UpdatedAt { get; set; }
     
     // Paged items

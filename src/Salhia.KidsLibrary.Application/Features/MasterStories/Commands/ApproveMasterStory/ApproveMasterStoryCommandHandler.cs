@@ -25,7 +25,7 @@ public class ApproveMasterStoryCommandHandler(
         if (masterStory is null)
             throw new NotFoundException(nameof(MasterStory), request.Id);
         
-        masterStory.IsApproved = request.IsApproved;
+        masterStory.ApprovalStatus = request.ApprovalStatus;
 
         // Set audit fields
         var currentUserId = currentUserService.UserId;

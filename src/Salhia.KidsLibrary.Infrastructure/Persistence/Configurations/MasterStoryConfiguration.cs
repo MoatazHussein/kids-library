@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Salhia.KidsLibrary.Domain.Entities;
+using Salhia.KidsLibrary.Domain.Enums;
 
 namespace Salhia.KidsLibrary.Infrastructure.Persistence.Configurations;
 
@@ -17,6 +18,7 @@ public class MasterStoryConfiguration : IEntityTypeConfiguration<MasterStory>
 
         // Property Configurations
         builder.Property(ms => ms.Title)
+            .IsRequired()
             .HasMaxLength(200);
 
         builder.Property(ms => ms.Content)
@@ -25,11 +27,12 @@ public class MasterStoryConfiguration : IEntityTypeConfiguration<MasterStory>
         builder.Property(ms => ms.ImageUrl)
             .HasMaxLength(500);
 
-        builder.Property(ms => ms.IsApproved)
-            .HasDefaultValue(false);
+        builder.Property(ms => ms.ApprovalStatus)
+            .HasDefaultValue(ApprovalStatus.Pending);
 
         // Foreign Key Configuration
         builder.Property(ms => ms.StoryCategoryId)
+            .IsRequired()
             .HasMaxLength(26);
 
         // Audit Fields
@@ -68,6 +71,6 @@ public class MasterStoryConfiguration : IEntityTypeConfiguration<MasterStory>
         builder.HasIndex(ms => ms.StoryCategoryId); // For efficient lookups by category
         builder.HasIndex(ms => ms.Title);
         builder.HasIndex(ms => ms.CreatedAt);
-        builder.HasIndex(ms => ms.IsApproved);
+        builder.HasIndex(ms => ms.ApprovalStatus);
     }
 }

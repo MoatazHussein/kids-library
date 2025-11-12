@@ -18,7 +18,8 @@ public class UserConfiguration : IEntityTypeConfiguration<AppUser>
         builder.Property(u => u.FirstName).IsRequired().HasMaxLength(50);
         builder.Property(u => u.LastName).HasMaxLength(50);
         builder.Property(u => u.Email).HasMaxLength(256);
-        builder.Property(u => u.PhoneNumber).HasMaxLength(15);
+
+        builder.Property(u => u.PhoneNumber).IsRequired().HasMaxLength(15);
 
         // Indexes
         builder.HasIndex(u => u.PhoneNumber)

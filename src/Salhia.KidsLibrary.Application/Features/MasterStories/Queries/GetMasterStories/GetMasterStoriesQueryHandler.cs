@@ -7,6 +7,7 @@ using Salhia.KidsLibrary.Application.Common.Interfaces;
 using Salhia.KidsLibrary.Application.Common.Models;
 using Salhia.KidsLibrary.Application.Services.MasterStoryStatsService;
 using Salhia.KidsLibrary.Domain.Entities;
+using Salhia.KidsLibrary.Domain.Enums;
 
 namespace Salhia.KidsLibrary.Application.Features.MasterStories.Queries.GetMasterStories;
 
@@ -39,14 +40,14 @@ public class GetMasterStoriesQueryHandler(
         }
 
         // Filter by approval status
-        if (request.IsApproved.HasValue)
+        if (request.ApprovalStatus.HasValue)
         {
-            predicate = predicate.And(x => x.IsApproved == request.IsApproved.Value);
+            predicate = predicate.And(x => x.ApprovalStatus == request.ApprovalStatus.Value);
         }
         else
         {
             // By default, only approved stories
-            predicate = predicate.And(x => x.IsApproved);
+            predicate = predicate.And(x => x.ApprovalStatus == ApprovalStatus.Approved);
         }
 
         // Search in title and content
@@ -79,6 +80,7 @@ public class GetMasterStoriesQueryHandler(
             Includes = [
                 ms => ms.StoryCategory!,
                 ms => ms.Author!,
+                ms => ms.UpdatedByUser!,
                 ms => ms.MediaItems,
                 ms => ms.Comments
             ]

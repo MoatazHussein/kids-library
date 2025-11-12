@@ -52,6 +52,7 @@ public class GetStoryCommentsQueryHandler(
         var parameters = new QueryParameters<StoryComment>
         {
             PageNumber = request.PageNumber,
+            Includes = [sc=>sc.CreatedByUser , sc => sc.UpdatedByUser!],
             PageSize = request.PageSize,
             Filter = filter,
             OrderBy = orderBy,

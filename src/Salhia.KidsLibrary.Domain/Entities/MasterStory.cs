@@ -1,19 +1,18 @@
 using System.ComponentModel.DataAnnotations;
+using Salhia.KidsLibrary.Domain.Enums;
 
 namespace Salhia.KidsLibrary.Domain.Entities;
 
 public class MasterStory : BaseEntity
 {
-    [Required]
     public string StoryCategoryId { get; set; } = default!;
 
-    [Required]
     public string Title { get; set; } = default!;
 
     public string? Content { get; set; }
 
     public string? ImageUrl { get; set; }
-    public bool IsApproved { get; set; }
+    public ApprovalStatus ApprovalStatus { get; set; }
 
     // Navigation property
     public StoryCategory StoryCategory { get; set; } = default!;

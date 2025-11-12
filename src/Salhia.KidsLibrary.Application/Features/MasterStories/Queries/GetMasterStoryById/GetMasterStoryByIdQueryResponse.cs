@@ -1,6 +1,8 @@
+using Salhia.KidsLibrary.Application.Common.Dtos.Users;
 using Salhia.KidsLibrary.Application.Common.Models;
 using Salhia.KidsLibrary.Application.Features.MediaItems.Queries.GetMediaItems;
 using Salhia.KidsLibrary.Application.Features.StoryComments.Queries.GetStoryComments;
+using Salhia.KidsLibrary.Domain.Enums;
 
 namespace Salhia.KidsLibrary.Application.Features.MasterStories.Queries.GetMasterStoryById;
 
@@ -13,14 +15,14 @@ public class GetMasterStoryByIdQueryResponse
     public string Title { get; set; } = string.Empty;
     public string? Content { get; set; }
     public string? ImageUrl { get; set; }
-    public bool IsApproved { get; set; }
+    public ApprovalStatus ApprovalStatus { get; set; }
     
     public string CreatedBy { get; set; } = string.Empty;
-    public string AuthorName { get; set; } = string.Empty;
+    public UserInfoDto Author { get; set; } = default!;
     public DateTime CreatedAt { get; set; }
     
     public string? UpdatedBy { get; set; }
-    public string? UpdatedByUserName { get; set; }
+    public UserInfoDto? UpdatedByUser { get; set; }
     public DateTime? UpdatedAt { get; set; }
     
     // Paged Media Items

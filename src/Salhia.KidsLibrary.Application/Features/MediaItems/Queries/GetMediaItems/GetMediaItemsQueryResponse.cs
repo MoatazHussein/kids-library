@@ -1,3 +1,5 @@
+using Salhia.KidsLibrary.Application.Common.Dtos.Users;
+
 namespace Salhia.KidsLibrary.Application.Features.MediaItems.Queries.GetMediaItems;
 
 public class GetMediaItemsQueryResponse
@@ -9,10 +11,10 @@ public class GetMediaItemsQueryResponse
     public string Url { get; set; } = string.Empty;
     
     public string CreatedBy { get; set; } = string.Empty;
-    public string? CreatedByUserName { get; set; }
+    public UserInfoDto? CreatedByUser { get; set; }
     public DateTime CreatedAt { get; set; }
     
     public string? UpdatedBy { get; set; }
-    public string? UpdatedByUserName { get; set; }
+    public UserInfoDto? UpdatedByUser { get; set; }
     public DateTime? UpdatedAt { get; set; }
 }

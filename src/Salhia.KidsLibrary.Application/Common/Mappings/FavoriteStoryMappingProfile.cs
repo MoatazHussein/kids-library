@@ -1,4 +1,5 @@
 using AutoMapper;
+using Salhia.KidsLibrary.Application.Common.Dtos.Users;
 using Salhia.KidsLibrary.Application.Features.FavoriteStories.Queries.GetFavoriteStories;
 using Salhia.KidsLibrary.Domain.Entities;
 
@@ -8,6 +9,9 @@ public class FavoriteStoryMappingProfile : Profile
 {
     public FavoriteStoryMappingProfile()
     {
+        // User mapping
+        CreateMap<AppUser, UserInfoDto>();
+        
         // Queries
         CreateMap<FavoriteStory, GetFavoriteStoriesQueryResponse>()
             .ForMember(dest => dest.FavoriteId, opt => opt.MapFrom(src => src.Id))
@@ -18,9 +22,9 @@ public class FavoriteStoryMappingProfile : Profile
             .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.MasterStory.Title))
             .ForMember(dest => dest.Content, opt => opt.MapFrom(src => src.MasterStory.Content))
             .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.MasterStory.ImageUrl))
-            .ForMember(dest => dest.IsApproved, opt => opt.MapFrom(src => src.MasterStory.IsApproved))
+            .ForMember(dest => dest.ApprovalStatus, opt => opt.MapFrom(src => src.MasterStory.ApprovalStatus))
             .ForMember(dest => dest.AuthorId, opt => opt.MapFrom(src => src.MasterStory.CreatedBy))
-            .ForMember(dest => dest.AuthorName, opt => opt.MapFrom(src => src.MasterStory.Author != null ? src.MasterStory.Author.UserName : null))
+            .ForMember(dest => dest.Author, opt => opt.MapFrom(src => src.MasterStory.Author))
             .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.MasterStory.CreatedAt))
             .ForMember(dest => dest.MediaItemsCount, opt => opt.MapFrom(src => src.MasterStory.MediaItems.Count))
             .ForMember(dest => dest.CommentsCount, opt => opt.MapFrom(src => src.MasterStory.Comments.Count));
