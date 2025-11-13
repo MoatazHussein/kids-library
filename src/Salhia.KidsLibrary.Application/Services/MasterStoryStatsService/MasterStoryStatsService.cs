@@ -164,4 +164,76 @@ public class MasterStoryStatsService(
 
         return result;
     }
+
+    public async Task UpdateLikesCountAsync(string storyId, int increment, CancellationToken cancellationToken = default)
+    {
+        logger.LogInformation("Updating likes count for story {StoryId} by {Increment}", storyId, increment);
+
+        var stats = await statsRepository.FirstOrDefaultAsync(e => e.MasterStoryId == storyId, cancellationToken);
+
+        if (stats is null)
+        {
+            // Create new stats record
+            stats = new MasterStoryStats
+            {
+                MasterStoryId = storyId,
+                RatingsCount = 0,
+                RatingsSum = 0,
+                LikesCount = Math.Max(0, increment), // Ensure non-negative
+                CreatedAt = DateTime.UtcNow,
+                CreatedBy = currentUserService.UserId
+            };
+            await statsRepository.AddAsync(stats, cancellationToken);
+            logger.LogInformation("Created new stats record for story {StoryId} with LikesCount={LikesCount}", storyId, stats.LikesCount);
+        }
+        else
+        {
+            // Update existing stats
+            stats.LikesCount = Math.Max(0, stats.LikesCount + increment); // Prevent negative count
+            stats.UpdatedAt = DateTime.UtcNow;
+            stats.UpdatedBy = currentUserService.UserId;
+
+            await statsRepository.UpdateAsync(stats);
+            logger.LogInformation("Updated likes count for story {StoryId}: LikesCount={LikesCount}", storyId, stats.LikesCount);
+        }
+    }
+
+    public async Task<int> GetLikesCountAsync(string storyId, CancellationToken cancellationToken = default)
+    {
+        logger.LogInformation("Getting likes count for story {StoryId}", storyId);
+
+        var stats = await statsRepository.FirstOrDefaultAsync(e => e.MasterStoryId == storyId, cancellationToken);
+
+        return stats?.LikesCount ?? 0;
+    }
+
+    public async Task<Dictionary<string, int>> GetMultipleStoryLikesCountsAsync(List<string> storyIds, CancellationToken cancellationToken = default)
+    {
+        logger.LogInformation("Getting likes counts for {Count} stories", storyIds.Count);
+
+        var parameters = new QueryParameters<MasterStoryStats>
+        {
+            Filter = stat => storyIds.Contains(stat.MasterStoryId)
+        };
+
+        var (statsList, _) = await statsRepository.GetAllMatchingAsync(parameters, cancellationToken);
+
+        var result = new Dictionary<string, int>();
+
+        foreach (var stat in statsList)
+        {
+            result[stat.MasterStoryId] = stat.LikesCount;
+        }
+
+        // Add entries for stories with no stats
+        foreach (var storyId in storyIds)
+        {
+            if (!result.ContainsKey(storyId))
+            {
+                result[storyId] = 0;
+            }
+        }
+
+        return result;
+    }
 }

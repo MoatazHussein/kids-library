@@ -98,6 +98,7 @@ public class GetMasterStoriesQueryHandler(
         // Get stats for all stories in this page using service
         var storyIds = masterStoryDtos.Select(ms => ms.Id).ToList();
         var statsDict = await statsService.GetMultipleStoryRatingStatsAsync(storyIds, cancellationToken);
+        var likesDict = await statsService.GetMultipleStoryLikesCountsAsync(storyIds, cancellationToken);
 
         // Map stats to each story
         foreach (var story in masterStoryDtos)
@@ -106,6 +107,11 @@ public class GetMasterStoriesQueryHandler(
             {
                 story.RatingsCount = stats.RatingsCount;
                 story.AverageRating = stats.AverageRating;
+            }
+            
+            if (likesDict.TryGetValue(story.Id, out var likesCount))
+            {
+                story.LikesCount = likesCount;
             }
         }
 

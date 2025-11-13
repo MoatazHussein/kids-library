@@ -3,6 +3,7 @@ using AutoMapper;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Salhia.KidsLibrary.Application.Common.Interfaces;
+using Salhia.KidsLibrary.Application.Common.Interfaces.Security;
 using Salhia.KidsLibrary.Application.Common.Models;
 using Salhia.KidsLibrary.Application.Features.StoryComments.Queries.GetStoryComments;
 using Salhia.KidsLibrary.Application.Services.MasterStoryStatsService;
@@ -14,7 +15,9 @@ namespace Salhia.KidsLibrary.Application.Features.MasterStories.Queries.GetMaste
 public class GetMasterStoryByIdQueryHandler(
     IRepository<MasterStory> masterStoryRepository,
     IRepository<StoryComment> commentRepository,
+    IRepository<StoryLike> storyLikeRepository,
     IMasterStoryStatsService statsService,
+    ICurrentUserService currentUserService,
     ILogger<GetMasterStoryByIdQueryHandler> logger,
     IMapper mapper,
     ITimeZoneConverter timeZoneConverter
@@ -76,6 +79,18 @@ public class GetMasterStoryByIdQueryHandler(
         var (ratingsCount, averageRating) = await statsService.GetStoryRatingStatsAsync(request.Id, cancellationToken);
         response.RatingsCount = ratingsCount;
         response.AverageRating = averageRating;
+
+        // Get like statistics from stats service
+        response.LikesCount = await statsService.GetLikesCountAsync(request.Id, cancellationToken);
+
+        // Check if current user liked this story
+        var currentUserId = currentUserService.UserId;
+        if (!string.IsNullOrEmpty(currentUserId))
+        {
+            response.IsLikedByCurrentUser = await storyLikeRepository.AnyAsync(
+                l => l.MasterStoryId == request.Id && l.UserId == currentUserId,
+                cancellationToken);
+        }
 
         return timeZoneConverter.ConvertUtcToLocal(response);
     }

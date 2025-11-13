@@ -50,6 +50,11 @@ public class Repository<T> : IRepository<T> where T : class
         return await _context.Set<T>().AnyAsync(predicate, cancellationToken);
     }
 
+    public async Task<int> CountAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)
+    {
+        return await _context.Set<T>().CountAsync(predicate, cancellationToken);
+    }
+
     public async Task<List<T>> GetAllAsync (Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default,
      params Expression<Func<T, object>>[] includes)
     {

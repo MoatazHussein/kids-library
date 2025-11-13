@@ -33,4 +33,7 @@ public class GetMasterStoriesQueryResponse
     // Rating Statistics
     public int RatingsCount { get; set; }
     public decimal? AverageRating { get; set; } // Calculated: RatingsSum / RatingsCount
+    
+    // Like Statistics
+    public int LikesCount { get; set; }
 }

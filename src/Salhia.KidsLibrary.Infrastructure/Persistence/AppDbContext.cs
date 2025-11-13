@@ -16,6 +16,7 @@ public class AppDbContext : IdentityDbContext<AppUser, AppRole, string>
     public DbSet<StoryComment> StoryComments { get; set; }
     public DbSet<FavoriteStory> FavoriteStories { get; set; }
     public DbSet<StoryRating> StoryRatings { get; set; }
+    public DbSet<StoryLike> StoryLikes { get; set; }
     public DbSet<MasterStoryStats> MasterStoryStats { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
