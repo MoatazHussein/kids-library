@@ -36,4 +36,7 @@ public class GetMasterStoriesQueryResponse
     
     // Like Statistics
     public int LikesCount { get; set; }
+    
+    // Share Statistics
+    public int SharesCount { get; set; }
 }

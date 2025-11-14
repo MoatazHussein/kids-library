@@ -93,17 +93,17 @@ public class MasterStoryStatsService(
             stats.UpdatedAt = DateTime.UtcNow;
             stats.UpdatedBy = currentUserService.UserId;
 
-            if (stats.RatingsCount <= 0)
+            await statsRepository.UpdateAsync(stats);
+            
+            if (stats.RatingsCount > 0)
             {
-                // Delete stats record if no ratings remain
-                await statsRepository.DeleteAsync(stats);
-                logger.LogInformation("Deleted stats record for story {StoryId} (no ratings remain)", storyId);
+                logger.LogInformation("Updated stats: RatingsCount={Count}, RatingsSum={Sum}, LikesCount={LikesCount}",
+                    stats.RatingsCount, stats.RatingsSum, stats.LikesCount);
             }
             else
             {
-                await statsRepository.UpdateAsync(stats);
-                logger.LogInformation("Updated stats: Count={Count}, Sum={Sum}, Avg={Avg:F2}",
-                    stats.RatingsCount, stats.RatingsSum, (decimal)stats.RatingsSum / stats.RatingsCount);
+                logger.LogInformation("Story {StoryId} has no ratings remaining (LikesCount={LikesCount})",
+                    storyId, stats.LikesCount);
             }
         }
         else
@@ -223,6 +223,79 @@ public class MasterStoryStatsService(
         foreach (var stat in statsList)
         {
             result[stat.MasterStoryId] = stat.LikesCount;
+        }
+
+        // Add entries for stories with no stats
+        foreach (var storyId in storyIds)
+        {
+            if (!result.ContainsKey(storyId))
+            {
+                result[storyId] = 0;
+            }
+        }
+
+        return result;
+    }
+
+    public async Task IncrementSharesCountAsync(string storyId, CancellationToken cancellationToken = default)
+    {
+        logger.LogInformation("Incrementing shares count for story {StoryId}", storyId);
+
+        var stats = await statsRepository.FirstOrDefaultAsync(e => e.MasterStoryId == storyId, cancellationToken);
+
+        if (stats is null)
+        {
+            // Create new stats record
+            stats = new MasterStoryStats
+            {
+                MasterStoryId = storyId,
+                RatingsCount = 0,
+                RatingsSum = 0,
+                LikesCount = 0,
+                SharesCount = 1,
+                CreatedAt = DateTime.UtcNow,
+                CreatedBy = currentUserService.IsAuthenticated ? currentUserService.UserId : null
+            };
+            await statsRepository.AddAsync(stats, cancellationToken);
+            logger.LogInformation("Created new stats record for story {StoryId} with SharesCount=1", storyId);
+        }
+        else
+        {
+            // Update existing stats
+            stats.SharesCount++;
+            stats.UpdatedAt = DateTime.UtcNow;
+            stats.UpdatedBy = currentUserService.IsAuthenticated ? currentUserService.UserId : null;
+
+            await statsRepository.UpdateAsync(stats);
+            logger.LogInformation("Updated shares count for story {StoryId}: SharesCount={SharesCount}", storyId, stats.SharesCount);
+        }
+    }
+
+    public async Task<int> GetSharesCountAsync(string storyId, CancellationToken cancellationToken = default)
+    {
+        logger.LogInformation("Getting shares count for story {StoryId}", storyId);
+
+        var stats = await statsRepository.FirstOrDefaultAsync(e => e.MasterStoryId == storyId, cancellationToken);
+
+        return stats?.SharesCount ?? 0;
+    }
+
+    public async Task<Dictionary<string, int>> GetMultipleStorySharesCountsAsync(List<string> storyIds, CancellationToken cancellationToken = default)
+    {
+        logger.LogInformation("Getting shares counts for {Count} stories", storyIds.Count);
+
+        var parameters = new QueryParameters<MasterStoryStats>
+        {
+            Filter = stat => storyIds.Contains(stat.MasterStoryId)
+        };
+
+        var (statsList, _) = await statsRepository.GetAllMatchingAsync(parameters, cancellationToken);
+
+        var result = new Dictionary<string, int>();
+
+        foreach (var stat in statsList)
+        {
+            result[stat.MasterStoryId] = stat.SharesCount;
         }
 
         // Add entries for stories with no stats

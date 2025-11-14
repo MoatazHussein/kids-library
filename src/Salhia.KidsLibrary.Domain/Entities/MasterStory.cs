@@ -28,5 +28,6 @@ public class MasterStory : BaseEntity
     public ICollection<StoryComment> Comments { get; set; } = [];
     public ICollection<StoryRating> Ratings { get; set; } = [];
     public ICollection<StoryLike> Likes { get; set; } = [];
+    public ICollection<StoryShare> Shares { get; set; } = [];
 
 }

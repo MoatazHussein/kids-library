@@ -38,5 +38,8 @@ public class GetMasterStoryByIdQueryResponse
     
     // Like Statistics
     public int LikesCount { get; set; }
-    public bool IsLikedByCurrentUser { get; set; }
+    public bool? IsLikedByCurrentUser { get; set; } = null;
+    
+    // Share Statistics
+    public int SharesCount { get; set; }
 }

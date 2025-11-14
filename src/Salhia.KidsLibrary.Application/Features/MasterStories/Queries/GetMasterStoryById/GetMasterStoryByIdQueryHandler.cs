@@ -83,14 +83,17 @@ public class GetMasterStoryByIdQueryHandler(
         // Get like statistics from stats service
         response.LikesCount = await statsService.GetLikesCountAsync(request.Id, cancellationToken);
 
-        // Check if current user liked this story
-        var currentUserId = currentUserService.UserId;
-        if (!string.IsNullOrEmpty(currentUserId))
+        // Check if current user liked this story (only for authenticated users)
+        if (currentUserService.IsAuthenticated)
         {
+            var currentUserId = currentUserService.UserId;
             response.IsLikedByCurrentUser = await storyLikeRepository.AnyAsync(
                 l => l.MasterStoryId == request.Id && l.UserId == currentUserId,
                 cancellationToken);
         }
+
+        // Get share statistics from stats service
+        response.SharesCount = await statsService.GetSharesCountAsync(request.Id, cancellationToken);
 
         return timeZoneConverter.ConvertUtcToLocal(response);
     }
