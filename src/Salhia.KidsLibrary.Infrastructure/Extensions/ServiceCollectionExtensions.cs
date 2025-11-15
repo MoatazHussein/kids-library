@@ -52,6 +52,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IStartupTask, EnsureStorageFoldersTask>();
         
 
+        services.AddScoped<IDashboardRepository, DashboardRepository>();
 
     }
 

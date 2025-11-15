@@ -2,6 +2,7 @@
 using Salhia.KidsLibrary.Application.Common.Dtos.Users;
 using Salhia.KidsLibrary.Application.Common.Interfaces;
 using Salhia.KidsLibrary.Application.Common.Interfaces.Security;
+using Salhia.KidsLibrary.Domain.Enums;
 using Salhia.KidsLibrary.Domain.Exceptions;
 using MediatR;
 using Microsoft.Extensions.Configuration;
@@ -21,7 +22,9 @@ public class RegisterUserCommandHandler(
 
         var user = await userService.CreateUserAsync(registerUserRequest, cancellationToken);
 
-        await userService.AddToRoleAsync(user.Id, request.UserType.ToString() , cancellationToken);
+        // Assign role based on UserType (UserType and UserRole enums have matching values)
+        var userRole = (UserRole)request.UserType;
+        await userService.AddToRoleAsync(user.Id, userRole.ToString(), cancellationToken);
 
         var token = await userService.GenerateEmailConfirmationTokenAsync(user.Id, cancellationToken);
 

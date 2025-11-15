@@ -12,7 +12,7 @@ public class AssignUserRoleCommandHandler(IUserService userService) : IRequestHa
 
         if (user is null || string.IsNullOrWhiteSpace(request.Email)) return false;
 
-        return await userService.AddToRoleAsync(user.Id, request.RoleName, ct);
+        return await userService.AddToRoleAsync(user.Id, request.Role.ToString(), ct);
     }
 }
 

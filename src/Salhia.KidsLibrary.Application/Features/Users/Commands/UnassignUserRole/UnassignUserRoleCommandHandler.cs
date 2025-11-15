@@ -11,8 +11,8 @@ public class UnassignUserRoleCommandHandler(ILogger<UnassignUserRoleCommandHandl
     {
         logger.LogInformation("Unassigning user role: {@Request}", request);
 
-        var ok = await userService.RemoveFromRoleAsync(request.UserEmail, request.RoleName, cancellationToken);
+        var ok = await userService.RemoveFromRoleAsync(request.UserEmail, request.Role.ToString(), cancellationToken);
         if (!ok)
-            throw new NotFoundException("User or Role", $"{request.UserEmail} / {request.RoleName}");
+            throw new NotFoundException("User or Role", $"{request.UserEmail} / {request.Role}");
     }
 }

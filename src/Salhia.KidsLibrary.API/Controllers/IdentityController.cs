@@ -1,5 +1,5 @@
-﻿using Salhia.KidsLibrary.Application.Common.Dtos.Users;
-using Salhia.KidsLibrary.Application.Features.Users.Commands.AssignUserRole;
+﻿using Salhia.KidsLibrary.Application.Features.Users.Commands.AssignUserRole;
+using Salhia.KidsLibrary.Application.Features.Users.Commands.ChangeUserRole;
 using Salhia.KidsLibrary.Application.Features.Users.Commands.ConfirmEmail;
 using Salhia.KidsLibrary.Application.Features.Users.Commands.ForgotPassword;
 using Salhia.KidsLibrary.Application.Features.Users.Commands.Login;
@@ -36,7 +36,7 @@ public class IdentityController(IMediator mediator, IConfiguration configuration
         return Ok("User updated successfully.");
     }
 
-    [HttpGet("users")]
+    [HttpPost("users")]
     public async Task<IActionResult> GetUsers()
     {
         var result = await mediator.Send(new GetAllUsersQuery());
@@ -57,6 +57,14 @@ public class IdentityController(IMediator mediator, IConfiguration configuration
     {
         await mediator.Send(command);
         return NoContent();
+    }
+
+    [HttpPut("userRole/change")]
+    [Authorize(Roles = UserRoles.Admin)]
+    public async Task<IActionResult> ChangeUserRole(ChangeUserRoleCommand command)
+    {
+        await mediator.Send(command);
+        return Ok(new { message = $"User role changed successfully to {command.NewRole}" });
     }
 
     [HttpDelete("userRole")]

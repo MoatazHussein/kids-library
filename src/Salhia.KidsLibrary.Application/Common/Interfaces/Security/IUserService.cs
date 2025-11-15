@@ -33,6 +33,7 @@ public interface IUserService
     Task<(int UserTypeValue, string UserTypeName)> GetUserTypeAsync(string userId, CancellationToken ct = default);
     Task<bool> ResetPasswordAsync(string email, string token, string newPassword, CancellationToken ct = default);
     Task<bool> RemoveFromRoleAsync(string email, string roleName, CancellationToken ct = default);
+    Task<bool> UpdateUserTypeAsync(string userId, int userType, CancellationToken ct = default);
     Task<string> NormalizePhoneAsync(string phone, CancellationToken ct);
     Task<AppUser?> FindByPhoneAsync(string phone, CancellationToken ct);
     Task<AppUser> CreateUserAsync(AppUser user, CancellationToken ct);

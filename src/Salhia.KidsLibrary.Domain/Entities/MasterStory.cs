@@ -29,5 +29,6 @@ public class MasterStory : BaseEntity
     public ICollection<StoryRating> Ratings { get; set; } = [];
     public ICollection<StoryLike> Likes { get; set; } = [];
     public ICollection<StoryShare> Shares { get; set; } = [];
+    public ICollection<StoryViewSession> ViewSessions { get; set; } = [];
 
 }

@@ -10,7 +10,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Salhia.KidsLibrary.Infrastructure.Services.Security;
 
-public sealed class UserService(UserManager<AppUser> userManager, SignInManager<AppUser> signIn) : IUserService
+public sealed class UserService(
+    UserManager<AppUser> userManager,
+    SignInManager<AppUser> signIn
+    ) : IUserService
 {
     // -------------------- User Commands --------------------
 
@@ -155,7 +158,12 @@ public sealed class UserService(UserManager<AppUser> userManager, SignInManager<
         // Apply search filter
         if (!string.IsNullOrWhiteSpace(search))
         {
-            query = query.Where(u => (u.Email ?? string.Empty).Contains(search));
+            query = query.Where(u =>
+                    (u.Email ?? string.Empty).ToLower().Contains(search) ||
+                    (u.FirstName ?? string.Empty).ToLower().Contains(search) ||
+                    (u.LastName ?? string.Empty).ToLower().Contains(search) || 
+                    (u.PhoneNumber ?? string.Empty).ToLower().Contains(search)
+                );
         }
 
         var total = await query.CountAsync(ct);
@@ -191,6 +199,18 @@ public sealed class UserService(UserManager<AppUser> userManager, SignInManager<
         if (user is null) return false;
         var res = await userManager.RemoveFromRoleAsync(user, roleName);
         return res.Succeeded;
+    }
+
+    public async Task<bool> UpdateUserTypeAsync(string userId, int userType, CancellationToken ct = default)
+    {
+        var user = await userManager.FindByIdAsync(userId);
+        if (user is null) return false;
+        
+        user.UserType = (Domain.Enums.UserType)userType;
+        user.UpdatedAt = DateTime.UtcNow;
+        
+        var result = await userManager.UpdateAsync(user);
+        return result.Succeeded;
     }
 
     // -------- Auth / credentials --------

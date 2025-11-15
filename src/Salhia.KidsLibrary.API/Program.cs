@@ -18,9 +18,10 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin",
         builder => builder
-        .WithOrigins("http://localhost:3000", "https://salhiakids.vercel.app")
+        .WithOrigins("http://localhost:3000", "https://salhiakids.vercel.app") 
         .AllowAnyHeader()
-        .AllowAnyMethod());
+        .AllowAnyMethod()
+    );
 });
 
 var app = builder.Build();
