@@ -2,6 +2,7 @@
 using FluentValidation.AspNetCore;
 using Microsoft.Extensions.DependencyInjection;
 using Salhia.KidsLibrary.Application.Services.MasterStoryStatsService;
+using Salhia.KidsLibrary.Application.Services.StoryViewService;
 
 namespace Salhia.KidsLibrary.Application.Extensions;
 
@@ -21,6 +22,7 @@ public static class ServiceCollectionExtensions
 
 
         services.AddScoped<IMasterStoryStatsService,MasterStoryStatsService>();
+        services.AddScoped<IStoryViewService, StoryViewService>();
 
     }
 }

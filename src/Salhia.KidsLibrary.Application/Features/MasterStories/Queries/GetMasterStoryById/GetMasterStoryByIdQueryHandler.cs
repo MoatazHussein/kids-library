@@ -35,6 +35,7 @@ public class GetMasterStoryByIdQueryHandler(
             cancellationToken,
             [
                 ms => ms.StoryCategory,
+                ms => ms.Comments,
                 ms => ms.Author!,
                 ms => ms.UpdatedByUser!
             ]);
@@ -94,6 +95,9 @@ public class GetMasterStoryByIdQueryHandler(
 
         // Get share statistics from stats service
         response.SharesCount = await statsService.GetSharesCountAsync(request.Id, cancellationToken);
+
+        // Get view statistics from stats service
+        response.TotalViews = await statsService.GetStoryViewsCountAsync(request.Id);
 
         return timeZoneConverter.ConvertUtcToLocal(response);
     }

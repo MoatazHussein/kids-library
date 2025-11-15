@@ -39,4 +39,7 @@ public class GetMasterStoriesQueryResponse
     
     // Share Statistics
     public int SharesCount { get; set; }
+    
+    // View Statistics
+    public int TotalViews { get; set; }
 }

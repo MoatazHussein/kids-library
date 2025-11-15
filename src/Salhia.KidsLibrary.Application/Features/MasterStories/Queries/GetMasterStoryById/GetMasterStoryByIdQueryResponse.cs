@@ -31,7 +31,9 @@ public class GetMasterStoryByIdQueryResponse
     
     // Paged Comments
     public PagedResult<GetStoryCommentsQueryResponse> Comments { get; set; } = null!;
-    
+
+    public int CommentsCount { get; set; }
+
     // Rating Statistics
     public int RatingsCount { get; set; }
     public decimal? AverageRating { get; set; } // Calculated: RatingsSum / RatingsCount
@@ -42,4 +44,7 @@ public class GetMasterStoryByIdQueryResponse
     
     // Share Statistics
     public int SharesCount { get; set; }
+    
+    // View Statistics
+    public int TotalViews { get; set; }
 }

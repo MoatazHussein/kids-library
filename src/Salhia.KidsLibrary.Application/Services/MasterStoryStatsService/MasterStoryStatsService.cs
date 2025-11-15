@@ -309,4 +309,44 @@ public class MasterStoryStatsService(
 
         return result;
     }
+
+    public async Task<int> GetStoryViewsCountAsync(string storyId)
+    {
+        logger.LogInformation("Getting views count for story {StoryId}", storyId);
+
+        var stats = await statsRepository.FirstOrDefaultAsync(e => e.MasterStoryId == storyId);
+
+        return stats?.TotalViews ?? 0;
+    }
+
+    public async Task<Dictionary<string, int>> GetMultipleStoryViewsCountsAsync(IEnumerable<string> storyIds)
+    {
+        var storyIdsList = storyIds.ToList();
+        logger.LogInformation("Getting views counts for {Count} stories", storyIdsList.Count);
+
+        var parameters = new QueryParameters<MasterStoryStats>
+        {
+            Filter = stat => storyIdsList.Contains(stat.MasterStoryId)
+        };
+
+        var (statsList, _) = await statsRepository.GetAllMatchingAsync(parameters);
+
+        var result = new Dictionary<string, int>();
+
+        foreach (var stat in statsList)
+        {
+            result[stat.MasterStoryId] = stat.TotalViews;
+        }
+
+        // Add entries for stories with no stats
+        foreach (var storyId in storyIdsList)
+        {
+            if (!result.ContainsKey(storyId))
+            {
+                result[storyId] = 0;
+            }
+        }
+
+        return result;
+    }
 }

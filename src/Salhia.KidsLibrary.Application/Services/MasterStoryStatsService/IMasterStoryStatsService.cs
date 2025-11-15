@@ -20,4 +20,7 @@ public interface IMasterStoryStatsService
     Task<Dictionary<string, int>> GetMultipleStoryLikesCountsAsync(List<string> storyIds, CancellationToken cancellationToken = default);
     Task<int> GetSharesCountAsync(string storyId, CancellationToken cancellationToken = default);
     Task<Dictionary<string, int>> GetMultipleStorySharesCountsAsync(List<string> storyIds, CancellationToken cancellationToken = default);
+
+    Task<int> GetStoryViewsCountAsync(string storyId);
+    Task<Dictionary<string, int>> GetMultipleStoryViewsCountsAsync(IEnumerable<string> storyIds);
 }

@@ -7,7 +7,8 @@ public class MasterStoryStats : BaseEntity
     public int RatingsSum { get; set; }
     public int LikesCount { get; set; }
     public int SharesCount { get; set; }
-    
+    public int TotalViews { get; set; }
+
     // Navigation property
     public MasterStory MasterStory { get; set; } = default!;
 }

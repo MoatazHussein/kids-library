@@ -100,6 +100,7 @@ public class GetMasterStoriesQueryHandler(
         var statsDict = await statsService.GetMultipleStoryRatingStatsAsync(storyIds, cancellationToken);
         var likesDict = await statsService.GetMultipleStoryLikesCountsAsync(storyIds, cancellationToken);
         var sharesDict = await statsService.GetMultipleStorySharesCountsAsync(storyIds, cancellationToken);
+        var viewsDict = await statsService.GetMultipleStoryViewsCountsAsync(storyIds);
 
         // Map stats to each story
         foreach (var story in masterStoryDtos)
@@ -118,6 +119,11 @@ public class GetMasterStoriesQueryHandler(
             if (sharesDict.TryGetValue(story.Id, out var sharesCount))
             {
                 story.SharesCount = sharesCount;
+            }
+            
+            if (viewsDict.TryGetValue(story.Id, out var viewsCount))
+            {
+                story.TotalViews = viewsCount;
             }
         }
 
