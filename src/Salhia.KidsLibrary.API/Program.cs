@@ -21,6 +21,7 @@ builder.Services.AddCors(options =>
         .WithOrigins("http://localhost:3000", "https://salhiakids.vercel.app") 
         .AllowAnyHeader()
         .AllowAnyMethod()
+        .AllowCredentials()
     );
 });
 

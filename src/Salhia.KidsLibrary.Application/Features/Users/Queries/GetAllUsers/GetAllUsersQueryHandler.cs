@@ -25,6 +25,7 @@ public class GetAllUsersQueryHandler(
             request.PageNumber,
             request.PageSize,
             request.SearchPhrase,
+            request.UserType,
             includes,
             cancellationToken);
 

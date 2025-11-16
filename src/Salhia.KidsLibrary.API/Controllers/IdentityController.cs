@@ -28,18 +28,19 @@ public class IdentityController(IMediator mediator, IConfiguration configuration
         return Ok("User registered successfully.");
     }
 
-
+    [Authorize]
     [HttpPatch("update")]
-    public async Task<IActionResult> UpdateClient(UpdateUserCommand command)
+    public async Task<IActionResult> UpdateUser(UpdateUserCommand command)
     {
         await mediator.Send(command);
         return Ok("User updated successfully.");
     }
 
+    [Authorize(Roles = UserRoles.Admin)]
     [HttpPost("users")]
-    public async Task<IActionResult> GetUsers()
+    public async Task<IActionResult> GetUsers(GetAllUsersQuery command)
     {
-        var result = await mediator.Send(new GetAllUsersQuery());
+        var result = await mediator.Send(command);
         return Ok(result);
     }
 
@@ -51,24 +52,24 @@ public class IdentityController(IMediator mediator, IConfiguration configuration
         return Ok(result);
     }
 
-    [HttpPost("userRole")]
     [Authorize(Roles = UserRoles.Admin)]
+    [HttpPost("userRole")]
     public async Task<IActionResult> AssignUserRole(AssignUserRoleCommand command)
     {
         await mediator.Send(command);
         return NoContent();
     }
 
-    [HttpPut("userRole/change")]
     [Authorize(Roles = UserRoles.Admin)]
+    [HttpPut("userRole/change")]
     public async Task<IActionResult> ChangeUserRole(ChangeUserRoleCommand command)
     {
         await mediator.Send(command);
         return Ok(new { message = $"User role changed successfully to {command.NewRole}" });
     }
 
-    [HttpDelete("userRole")]
     [Authorize(Roles = UserRoles.Admin)]
+    [HttpDelete("userRole")]
     public async Task<IActionResult> UnassignedUserRole(UnassignUserRoleCommand command)
     {
         await mediator.Send(command);

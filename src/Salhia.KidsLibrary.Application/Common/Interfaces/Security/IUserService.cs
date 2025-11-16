@@ -1,9 +1,10 @@
 using System.Linq.Expressions;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Identity;
 using Salhia.KidsLibrary.Application.Common.Dtos.Users;
 using Salhia.KidsLibrary.Application.Common.Models;
 using Salhia.KidsLibrary.Domain.Entities;
-using Microsoft.AspNetCore.Identity;
+using Salhia.KidsLibrary.Domain.Enums;
 
 namespace Salhia.KidsLibrary.Application.Common.Interfaces.Security;
 
@@ -23,7 +24,7 @@ public interface IUserService
     Task<IReadOnlyList<string>> GetRolesAsync(string userId, CancellationToken ct = default);
     Task<List<string>> GetUserRolesAsync(AppUser user, CancellationToken ct = default);
     Task<bool> AddToRoleAsync(string userId, string roleName, CancellationToken ct = default);
-    Task<PagedResult<AppUser>> GetPagedAsync(int pageNumber, int pageSize, string? search = null, Expression<Func<AppUser, object>>[]? includes = null,
+    Task<PagedResult<AppUser>> GetPagedAsync(int pageNumber, int pageSize, string? search = null, UserType? userType = null, Expression<Func<AppUser, object>>[]? includes = null,
   CancellationToken ct = default);
     Task<bool> ConfirmEmailAsync(string userId, string token, CancellationToken ct = default);
     Task<string?> GenerateEmailConfirmationTokenAsync(string email, CancellationToken ct = default);

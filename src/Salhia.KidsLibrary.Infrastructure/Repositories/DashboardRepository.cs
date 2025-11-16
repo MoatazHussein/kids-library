@@ -356,50 +356,51 @@ public class DashboardRepository(AppDbContext context, ILogger<DashboardReposito
         logger.LogInformation("Executing optimized dashboard overview queries for period {Period}", period);
 
         var periodFrom = GetPeriodStartDate(period);
+        
 
-        // Query 1: Fast counts query (stories by status, users)
-        var countsData = await (
-            from ms in context.MasterStories
-            group ms by 1 into g
-            select new
-            {
-                TotalStories = g.Count(),
-                ApprovedStories = g.Count(s => s.ApprovalStatus == ApprovalStatus.Approved),
-                PendingStories = g.Count(s => s.ApprovalStatus == ApprovalStatus.Pending),
-                RejectedStories = g.Count(s => s.ApprovalStatus == ApprovalStatus.Rejected),
-                TotalUsers = context.Users.Count(),
-                ActiveUsersInPeriod = context.StoryViewSessions
-                    .Where(vs => vs.LastViewAt >= periodFrom)
-                    .Select(vs => vs.UserId)
-                    .Distinct()
-                    .Count(),
-                NewUsersInPeriod = context.Users
-                    .Count(u => u.CreatedAt >= periodFrom)
-            }).FirstOrDefaultAsync(cancellationToken);
+        // Query 1: Counts query
+        var totalStories = await context.MasterStories.CountAsync(cancellationToken);
+        var totalStoriesInPeriod = await context.MasterStories.CountAsync(s => s.CreatedAt >= periodFrom, cancellationToken);
+        var approvedStoriesInPeriod = await context.MasterStories.CountAsync(
+            s => s.ApprovalStatus == ApprovalStatus.Approved  && s.CreatedAt >= periodFrom, cancellationToken);
+        var pendingStoriesInPeriod = await context.MasterStories.CountAsync(
+            s => s.ApprovalStatus == ApprovalStatus.Pending && s.CreatedAt >= periodFrom, cancellationToken);
+        var rejectedStoriesInPeriod = await context.MasterStories.CountAsync(
+            s => s.ApprovalStatus == ApprovalStatus.Rejected && s.CreatedAt >= periodFrom, cancellationToken);
 
-        // Query 2: Period engagement query (views, likes, shares, comments, ratings with period filter)
-        var periodEngagement = await (
-            from ms in context.MasterStories
-            where ms.ApprovalStatus == ApprovalStatus.Approved
-            group ms by 1 into g
-            select new
-            {
-                ViewsInPeriod = g.SelectMany(ms => ms.ViewSessions)
-                    .Where(vs => vs.LastViewAt >= periodFrom)
-                    .Sum(vs => (int?)vs.ViewCount) ?? 0,
-                
-                LikesInPeriod = g.SelectMany(ms => ms.Likes)
-                    .Count(l => l.CreatedAt >= periodFrom),
-                
-                SharesInPeriod = g.SelectMany(ms => ms.Shares)
-                    .Count(s => s.CreatedAt >= periodFrom),
-                
-                CommentsInPeriod = g.SelectMany(ms => ms.Comments)
-                    .Count(c => c.CreatedAt >= periodFrom),
-                
-                RatingsInPeriod = g.SelectMany(ms => ms.Ratings)
-                    .Count(r => r.CreatedAt >= periodFrom)
-            }).FirstOrDefaultAsync(cancellationToken);
+        var totalUsers = await context.Users.CountAsync(cancellationToken);
+        var activeUsersInPeriod = await context.StoryViewSessions
+            .Where(vs => vs.LastViewAt >= periodFrom)
+            .Select(vs => vs.UserId)
+            .Distinct()
+            .CountAsync(cancellationToken);
+        var newUsersInPeriod = await context.Users.CountAsync(u => u.CreatedAt >= periodFrom, cancellationToken);
+
+        // Query 2: Period engagement (only on approved stories)
+        var viewsInPeriod = await context.StoryViewSessions
+            .Where(vs => vs.LastViewAt >= periodFrom && 
+                   context.MasterStories.Any(ms => ms.Id == vs.MasterStoryId))
+            .SumAsync(vs => vs.ViewCount, cancellationToken);
+
+        var likesInPeriod = await context.StoryLikes
+            .Where(l => l.CreatedAt >= periodFrom &&
+                   context.MasterStories.Any(ms => ms.Id == l.MasterStoryId))
+            .CountAsync(cancellationToken);
+
+        var sharesInPeriod = await context.StoryShares
+            .Where(s => s.CreatedAt >= periodFrom &&
+                   context.MasterStories.Any(ms => ms.Id == s.MasterStoryId))
+            .CountAsync(cancellationToken);
+
+        var commentsInPeriod = await context.StoryComments
+            .Where(c => c.CreatedAt >= periodFrom &&
+                   context.MasterStories.Any(ms => ms.Id == c.MasterStoryId))
+            .CountAsync(cancellationToken);
+
+        var ratingsInPeriod = await context.StoryRatings
+            .Where(r => r.CreatedAt >= periodFrom &&
+                   context.MasterStories.Any(ms => ms.Id == r.MasterStoryId))
+            .CountAsync(cancellationToken);
 
         // Query 3: Stats cache query (use MasterStoryStats for instant totals)
         var totalStats = await context.MasterStoryStats
@@ -414,12 +415,6 @@ public class DashboardRepository(AppDbContext context, ILogger<DashboardReposito
                 TotalRatingsSum = g.Sum(s => (int?)s.RatingsSum) ?? 0
             }).FirstOrDefaultAsync(cancellationToken);
 
-        // Handle null responses
-        if (countsData == null || periodEngagement == null)
-        {
-            return new DashboardOverviewData();
-        }
-
         // Calculate average rating
         var averageRating = totalStats?.TotalRatings > 0
             ? (decimal)totalStats.TotalRatingsSum / totalStats.TotalRatings
@@ -428,22 +423,23 @@ public class DashboardRepository(AppDbContext context, ILogger<DashboardReposito
         return new DashboardOverviewData
         {
             // Story counts
-            TotalStories = countsData.TotalStories,
-            ApprovedStories = countsData.ApprovedStories,
-            PendingStories = countsData.PendingStories,
-            RejectedStories = countsData.RejectedStories,
+            TotalStories = totalStories,
+            TotalStoriesInPeriod = totalStoriesInPeriod,
+            ApprovedStoriesInPeriod = approvedStoriesInPeriod,
+            PendingStoriesInPeriod = pendingStoriesInPeriod,
+            RejectedStoriesInPeriod = rejectedStoriesInPeriod,
             
             // User counts
-            TotalUsers = countsData.TotalUsers,
-            ActiveUsersInPeriod = countsData.ActiveUsersInPeriod,
-            NewUsersInPeriod = countsData.NewUsersInPeriod,
+            TotalUsers = totalUsers,
+            ActiveUsersInPeriod = activeUsersInPeriod,
+            NewUsersInPeriod = newUsersInPeriod,
             
             // Period engagement
-            ViewsInPeriod = periodEngagement.ViewsInPeriod,
-            LikesInPeriod = periodEngagement.LikesInPeriod,
-            SharesInPeriod = periodEngagement.SharesInPeriod,
-            CommentsInPeriod = periodEngagement.CommentsInPeriod,
-            RatingsInPeriod = periodEngagement.RatingsInPeriod,
+            ViewsInPeriod = viewsInPeriod,
+            LikesInPeriod = likesInPeriod,
+            SharesInPeriod = sharesInPeriod,
+            CommentsInPeriod = commentsInPeriod,
+            RatingsInPeriod = ratingsInPeriod,
             
             // Total engagement
             TotalViews = totalStats?.TotalViews ?? 0,

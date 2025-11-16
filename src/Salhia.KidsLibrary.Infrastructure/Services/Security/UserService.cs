@@ -4,6 +4,7 @@ using Salhia.KidsLibrary.Application.Common.Dtos.Users;
 using Salhia.KidsLibrary.Application.Common.Interfaces.Security;
 using Salhia.KidsLibrary.Application.Common.Models;
 using Salhia.KidsLibrary.Domain.Entities;
+using Salhia.KidsLibrary.Domain.Enums;
 using Salhia.KidsLibrary.Domain.Exceptions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -141,6 +142,7 @@ public sealed class UserService(
        int pageNumber,
        int pageSize,
        string? search = null,
+       UserType? userType = null,
        Expression<Func<AppUser, object>>[]? includes = null,
        CancellationToken ct = default)
     {
@@ -153,6 +155,12 @@ public sealed class UserService(
             {
                 query = query.Include(include);
             }
+        }
+
+        // Apply UserType filter
+        if (userType.HasValue)
+        {
+            query = query.Where(u => u.UserType == userType.Value);
         }
 
         // Apply search filter

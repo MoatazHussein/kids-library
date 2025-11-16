@@ -11,14 +11,16 @@ public class DashboardOverviewDto
 public class StoryCountsDto
 {
     public int Total { get; set; }
-    public int Approved { get; set; }
-    public int Pending { get; set; }
-    public int Rejected { get; set; }
+    public int TotalInPeriod { get; set; }
+    public int ApprovedInPeriod { get; set; }
+    public int PendingInPeriod { get; set; }
+    public int RejectedInPeriod { get; set; }
 }
 
 public class UserCountsDto
 {
     public int Total { get; set; }
+    public int ActiveUsersInPeriod { get; set; }
     public int ActiveInPeriod { get; set; }
     public int NewInPeriod { get; set; }
 }

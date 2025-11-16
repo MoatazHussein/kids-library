@@ -22,7 +22,7 @@ public static class VisitorHelper
             {
                 HttpOnly = true,
                 Secure = true,
-                SameSite = SameSiteMode.Lax,
+                SameSite = SameSiteMode.None,
                 Expires = DateTimeOffset.UtcNow.AddMonths(6)
             };
 

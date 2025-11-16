@@ -4,9 +4,10 @@ public class DashboardOverviewData
 {
     // Story Counts
     public int TotalStories { get; set; }
-    public int ApprovedStories { get; set; }
-    public int PendingStories { get; set; }
-    public int RejectedStories { get; set; }
+    public int TotalStoriesInPeriod { get; set; }
+    public int ApprovedStoriesInPeriod { get; set; }
+    public int PendingStoriesInPeriod { get; set; }
+    public int RejectedStoriesInPeriod { get; set; }
     
     // User Counts
     public int TotalUsers { get; set; }

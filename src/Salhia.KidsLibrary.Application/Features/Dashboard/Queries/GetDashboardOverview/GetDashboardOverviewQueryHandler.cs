@@ -40,13 +40,15 @@ public class GetDashboardOverviewQueryHandler(
             StoryCounts = new StoryCountsDto
             {
                 Total = overviewData.TotalStories,
-                Approved = overviewData.ApprovedStories,
-                Pending = overviewData.PendingStories,
-                Rejected = overviewData.RejectedStories
+                TotalInPeriod = overviewData.TotalStoriesInPeriod,
+                ApprovedInPeriod = overviewData.ApprovedStoriesInPeriod,
+                PendingInPeriod = overviewData.PendingStoriesInPeriod,
+                RejectedInPeriod = overviewData.RejectedStoriesInPeriod
             },
             UserCounts = new UserCountsDto
             {
                 Total = overviewData.TotalUsers,
+                ActiveUsersInPeriod = overviewData.ActiveUsersInPeriod,
                 ActiveInPeriod = overviewData.ActiveUsersInPeriod,
                 NewInPeriod = overviewData.NewUsersInPeriod
             },
