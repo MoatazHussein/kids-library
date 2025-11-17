@@ -38,6 +38,7 @@ public interface IUserService
     Task<bool> DisableUserAsync(string userId, CancellationToken ct = default);
     Task<bool> EnableUserAsync(string userId, CancellationToken ct = default);
     Task<bool> IsUserDisabledAsync(string userId, CancellationToken ct = default);
+    Task<List<AppUser>> GetAllAdminsAsync(CancellationToken ct = default);
     Task<string> NormalizePhoneAsync(string phone, CancellationToken ct);
     Task<AppUser?> FindByPhoneAsync(string phone, CancellationToken ct);
     Task<AppUser> CreateUserAsync(AppUser user, CancellationToken ct);

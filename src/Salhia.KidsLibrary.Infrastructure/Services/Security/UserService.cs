@@ -1,13 +1,14 @@
 using System.Linq.Expressions;
 using System.Security.Claims;
+using Azure.Core;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Salhia.KidsLibrary.Application.Common.Dtos.Users;
 using Salhia.KidsLibrary.Application.Common.Interfaces.Security;
 using Salhia.KidsLibrary.Application.Common.Models;
 using Salhia.KidsLibrary.Domain.Entities;
 using Salhia.KidsLibrary.Domain.Enums;
 using Salhia.KidsLibrary.Domain.Exceptions;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 
 namespace Salhia.KidsLibrary.Infrastructure.Services.Security;
 
@@ -83,10 +84,12 @@ public sealed class UserService(
         return new AppUser
         {
             Id = user.Id,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            UserName = user.Email,
             Email = user.Email,
-            FirstName = user.FirstName,     
-            LastName =user.LastName,
             PhoneNumber = user.PhoneNumber,
+            UserType = user.UserType,
         };
     }
 
@@ -100,7 +103,12 @@ public sealed class UserService(
         return new AppUser
         {
             Id = user.Id,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            UserName = user.Email,
             Email = user.Email,
+            PhoneNumber = user.PhoneNumber,
+            UserType = user.UserType,
         };
     }
 
@@ -245,6 +253,12 @@ public sealed class UserService(
         var user = await userManager.FindByIdAsync(userId);
         if (user is null) return false;
         return await userManager.IsLockedOutAsync(user);
+    }
+
+    public async Task<List<AppUser>> GetAllAdminsAsync(CancellationToken ct = default)
+    {
+        var admins = await userManager.GetUsersInRoleAsync(UserRole.Admin.ToString());
+        return admins.ToList();
     }
 
     // -------- Auth / credentials --------

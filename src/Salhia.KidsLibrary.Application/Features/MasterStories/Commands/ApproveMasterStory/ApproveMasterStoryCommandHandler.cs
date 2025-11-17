@@ -3,6 +3,7 @@ using Salhia.KidsLibrary.Application.Common.Interfaces;
 using Salhia.KidsLibrary.Application.Common.Interfaces.Security;
 using Salhia.KidsLibrary.Domain.Constants;
 using Salhia.KidsLibrary.Domain.Entities;
+using Salhia.KidsLibrary.Domain.Enums;
 using Salhia.KidsLibrary.Domain.Exceptions;
 
 namespace Salhia.KidsLibrary.Application.Features.MasterStories.Commands.ApproveMasterStory;
@@ -10,7 +11,8 @@ namespace Salhia.KidsLibrary.Application.Features.MasterStories.Commands.Approve
 public class ApproveMasterStoryCommandHandler(
     IRepository<MasterStory> masterStoryRepository,
     ICurrentUserService currentUserService,
-    IUnitOfWork unitOfWork
+    IUnitOfWork unitOfWork,
+    IStoryNotificationService notificationService
     ) : IRequestHandler<ApproveMasterStoryCommand, Unit>
 {
     public async Task<Unit> Handle(ApproveMasterStoryCommand request, CancellationToken cancellationToken)
@@ -34,6 +36,12 @@ public class ApproveMasterStoryCommandHandler(
         
         await masterStoryRepository.UpdateAsync(masterStory);
         await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        // Notify author if story is approved
+        if (request.ApprovalStatus == ApprovalStatus.Approved)
+        {
+            await notificationService.NotifyAuthorOfApprovalAsync(masterStory, cancellationToken);
+        }
         
         return Unit.Value;
     }

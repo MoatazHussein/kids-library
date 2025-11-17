@@ -12,7 +12,8 @@ public class AddMasterStoryCommandHandler(
     IRepository<StoryCategory> storyCategoryRepository,
     ICurrentUserService currentUserService,
     IUnitOfWork unitOfWork,
-    IMapper mapper
+    IMapper mapper,
+    IStoryNotificationService notificationService
     ) : IRequestHandler<AddMasterStoryCommand, string>
 {
     public async Task<string> Handle(AddMasterStoryCommand request, CancellationToken cancellationToken)
@@ -31,6 +32,13 @@ public class AddMasterStoryCommandHandler(
         
         await masterStoryRepository.AddAsync(masterStory, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        // Notify all admins about the new story
+        await notificationService.NotifyAdminsOfNewStoryAsync(
+            masterStory, 
+            currentUserId ?? string.Empty, 
+            categoryExists.Title, 
+            cancellationToken);
         
         return masterStory.Id;
     }
