@@ -62,6 +62,7 @@ public static class WebApplicationBuilderExtensions
         builder.Services.AddEndpointsApiExplorer();
 
         builder.Services.AddScoped<ErrorHandlingMiddleware>();
+        builder.Services.AddScoped<UserLockoutCheckMiddleware>();
         //builder.Services.AddScoped<RequestTimeLoggingMiddleware>();
 
         builder.Host.UseSerilog((context, configuration) =>

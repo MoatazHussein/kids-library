@@ -1,6 +1,8 @@
 ﻿using Salhia.KidsLibrary.Application.Features.Users.Commands.AssignUserRole;
 using Salhia.KidsLibrary.Application.Features.Users.Commands.ChangeUserRole;
 using Salhia.KidsLibrary.Application.Features.Users.Commands.ConfirmEmail;
+using Salhia.KidsLibrary.Application.Features.Users.Commands.DisableUser;
+using Salhia.KidsLibrary.Application.Features.Users.Commands.EnableUser;
 using Salhia.KidsLibrary.Application.Features.Users.Commands.ForgotPassword;
 using Salhia.KidsLibrary.Application.Features.Users.Commands.Login;
 using Salhia.KidsLibrary.Application.Features.Users.Commands.ResetPassword;
@@ -74,6 +76,28 @@ public class IdentityController(IMediator mediator, IConfiguration configuration
     {
         await mediator.Send(command);
         return NoContent();
+    }
+
+    /// <summary>
+    /// Disable a user account (user will be logged out on next request)
+    /// </summary>
+    [Authorize(Roles = UserRoles.Admin)]
+    [HttpPut("users/{userId}/disable")]
+    public async Task<IActionResult> DisableUser([FromRoute] string userId)
+    {
+        await mediator.Send(new DisableUserCommand { UserId = userId });
+        return Ok(new { message = "User has been disabled successfully" });
+    }
+
+    /// <summary>
+    /// Enable a previously disabled user account
+    /// </summary>
+    [Authorize(Roles = UserRoles.Admin)]
+    [HttpPut("users/{userId}/enable")]
+    public async Task<IActionResult> EnableUser([FromRoute] string userId)
+    {
+        await mediator.Send(new EnableUserCommand { UserId = userId });
+        return Ok(new { message = "User has been enabled successfully" });
     }
 
     [HttpPost("forgot-password")]

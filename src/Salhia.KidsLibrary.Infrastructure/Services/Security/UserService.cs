@@ -221,6 +221,32 @@ public sealed class UserService(
         return result.Succeeded;
     }
 
+    public async Task<bool> DisableUserAsync(string userId, CancellationToken ct = default)
+    {
+        var user = await userManager.FindByIdAsync(userId);
+        if (user is null) return false;
+        
+        await userManager.SetLockoutEnabledAsync(user, true);
+        var result = await userManager.SetLockoutEndDateAsync(user, DateTimeOffset.MaxValue);
+        return result.Succeeded;
+    }
+
+    public async Task<bool> EnableUserAsync(string userId, CancellationToken ct = default)
+    {
+        var user = await userManager.FindByIdAsync(userId);
+        if (user is null) return false;
+        
+        var result = await userManager.SetLockoutEndDateAsync(user, null);
+        return result.Succeeded;
+    }
+
+    public async Task<bool> IsUserDisabledAsync(string userId, CancellationToken ct = default)
+    {
+        var user = await userManager.FindByIdAsync(userId);
+        if (user is null) return false;
+        return await userManager.IsLockedOutAsync(user);
+    }
+
     // -------- Auth / credentials --------
     public async Task<bool> ValidateCredentialsAsync(string email, string password, bool lockoutOnFailure, CancellationToken ct = default)
     {

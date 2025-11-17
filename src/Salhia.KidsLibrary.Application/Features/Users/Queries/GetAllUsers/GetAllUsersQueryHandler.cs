@@ -34,6 +34,7 @@ public class GetAllUsersQueryHandler(
         {
             var dto = mapper.Map<UserDto>(user);
             dto.Roles = await userService.GetUserRolesAsync(user, cancellationToken);
+            dto.IsActive = !await userService.IsUserDisabledAsync(user.Id);
             userDtos.Add(dto);
         }
 

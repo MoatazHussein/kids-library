@@ -79,6 +79,7 @@ app.UseHttpsRedirection();
 app.UseCors("AllowSpecificOrigin");
 
 app.UseAuthentication();
+app.UseMiddleware<UserLockoutCheckMiddleware>();
 app.UseAuthorization();
 
 app.MapControllers();

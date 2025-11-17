@@ -15,6 +15,11 @@ public class LoginCommandHandler(IUserService userService, IJwtService jwtServic
         if (user is null)
             throw new NotFoundException(nameof(AppUser),$"{request.Email}");
 
+        // Check if user account is disabled
+        var isDisabled = await userService.IsUserDisabledAsync(user.Id);
+        if (isDisabled)
+            throw new UnAuthorizedAccessException("Your account has been disabled. Please contact an administrator.");
+
         var ok = await userService.ValidateCredentialsAsync(request.Email, request.Password, lockoutOnFailure: true, cancellationToken);
         if (!ok)
             throw new UnAuthorizedAccessException("Invalid credentials.");

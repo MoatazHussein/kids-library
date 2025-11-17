@@ -27,7 +27,6 @@ public class GetMasterStoriesQueryResponse
     public DateTime? UpdatedAt { get; set; }
     
     // Counts
-    public int MediaItemsCount { get; set; }
     public int CommentsCount { get; set; }
     
     // Rating Statistics
