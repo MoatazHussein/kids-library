@@ -9,6 +9,7 @@ public class GetCustomStoryByIdQueryResponse
     // Story data
     public string Id { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;
+    public string AuthorName { get; set; } = string.Empty;
     public string? Description { get; set; }
     public string? ImageUrl { get; set; }
     

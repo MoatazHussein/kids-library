@@ -63,7 +63,6 @@ public class GetFavoriteStoriesQueryHandler(
             Includes = [
                 fs => fs.MasterStory,
                 fs => fs.MasterStory.StoryCategory,
-                fs => fs.MasterStory.Author!,
                 fs => fs.MasterStory.Comments
             ]
         };

@@ -37,6 +37,9 @@ public class MasterStoryConfiguration : IEntityTypeConfiguration<MasterStory>
         builder.Property(ms => ms.ApprovalStatus)
             .HasDefaultValue(ApprovalStatus.Pending);
 
+        builder.Property(ms => ms.AuthorName)
+            .HasMaxLength(200);
+
         // Foreign Key Configuration
         builder.Property(ms => ms.StoryCategoryId)
             .IsRequired()
@@ -49,23 +52,21 @@ public class MasterStoryConfiguration : IEntityTypeConfiguration<MasterStory>
         builder.Property(ms => ms.UpdatedBy)
             .HasMaxLength(26);
 
-        // Relationship: Many MasterStories belong to One StoryCategory
         builder.HasOne(ms => ms.StoryCategory)
             .WithMany(sc => sc.MasterStories)
             .HasForeignKey(ms => ms.StoryCategoryId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // Author navigation (CreatedBy is the Author)
-        builder.HasOne(ms => ms.Author)
-            .WithMany()
-            .HasForeignKey(ms => ms.CreatedBy)
-            .OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne(ms => ms.CreatedByUser)
+             .WithMany()
+             .HasForeignKey(ms => ms.CreatedBy)
+             .OnDelete(DeleteBehavior.NoAction); 
 
-        // UpdatedByUser navigation
         builder.HasOne(ms => ms.UpdatedByUser)
             .WithMany()
             .HasForeignKey(ms => ms.UpdatedBy)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.NoAction); 
+
 
         // Indexes
         builder.HasIndex(ms => ms.Id); // For time-based ordering (ULID)

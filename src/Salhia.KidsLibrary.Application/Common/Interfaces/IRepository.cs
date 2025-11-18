@@ -13,6 +13,7 @@ public interface IRepository<T> where T : class
     Task<List<T>> GetAllAsync(Expression<Func<T, bool>> predicate,CancellationToken cancellationToken = default,params Expression<Func<T, object>>[] includes);
     Task<(IEnumerable<T>, int)> GetAllMatchingAsync(QueryParameters<T> parameters, CancellationToken cancellationToken = default);
     Task AddAsync(T entity, CancellationToken cancellationToken = default);
+    Task AddRangeAsync(IEnumerable<T> entities, CancellationToken cancellationToken = default);
     Task UpdateAsync(T entity);
     public Task<int> BulkUpdateAsync(Expression<Func<T, bool>> predicate, Expression<Func<SetPropertyCalls<T>, SetPropertyCalls<T>>> setPropertyCalls);
     Task DeleteAsync(T entity);

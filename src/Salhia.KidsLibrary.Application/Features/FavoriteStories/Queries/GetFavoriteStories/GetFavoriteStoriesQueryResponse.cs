@@ -23,8 +23,7 @@ public class GetFavoriteStoriesQueryResponse
     public int? PublishYear { get; set; }
     public ApprovalStatus ApprovalStatus { get; set; }
     
-    public string AuthorId { get; set; } = string.Empty;
-    public UserInfoDto? Author { get; set; }
+    public string AuthorName { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
     
     // Counts

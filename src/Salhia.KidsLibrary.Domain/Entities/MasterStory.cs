@@ -18,11 +18,13 @@ public class MasterStory : BaseEntity
     
     public int? PublishYear { get; set; }
     
+    public string AuthorName { get; set; } = default!;
+    
     public ApprovalStatus ApprovalStatus { get; set; }
 
     // Navigation property
     public StoryCategory StoryCategory { get; set; } = default!;
-    public AppUser Author { get; set; } = default!;
+    public AppUser? CreatedByUser { get; set; }
     public AppUser? UpdatedByUser { get; set; }
 
     public ICollection<StoryComment> Comments { get; set; } = [];

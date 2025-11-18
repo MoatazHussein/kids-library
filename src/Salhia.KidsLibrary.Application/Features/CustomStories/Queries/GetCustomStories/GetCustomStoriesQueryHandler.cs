@@ -30,12 +30,13 @@ public class GetCustomStoriesQueryHandler(
             predicate = predicate.And(x => x.CreatedBy == request.CreatedBy);
         }
 
-        // Search in title and description
+        // Search in title, author name, and description
         if (!string.IsNullOrWhiteSpace(request.SearchPhrase))
         {
             var search = request.SearchPhrase.Trim().ToLower();
             predicate = predicate.And(x => 
                 x.Title.ToLower().Contains(search) || 
+                x.AuthorName.ToLower().Contains(search) ||
                 (x.Description != null && x.Description.ToLower().Contains(search)));
         }
 

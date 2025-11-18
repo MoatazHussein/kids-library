@@ -39,5 +39,8 @@ public class UpdateMasterStoryCommandValidator : AbstractValidator<UpdateMasterS
             .GreaterThanOrEqualTo(2000).WithMessage("Publish year must be 2000 or later")
             .LessThanOrEqualTo(DateTime.UtcNow.Year + 10).WithMessage($"Publish year cannot be more than 10 years in the future")
             .When(x => x.PublishYear.HasValue);
+
+        RuleFor(x => x.AuthorName)
+            .MaximumLength(200).WithMessage("Author name must not exceed 200 characters");
     }
 }

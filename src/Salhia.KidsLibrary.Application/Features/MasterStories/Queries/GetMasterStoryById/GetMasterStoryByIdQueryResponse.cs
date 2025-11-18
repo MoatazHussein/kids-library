@@ -19,10 +19,11 @@ public class GetMasterStoryByIdQueryResponse
     public string MediaTypeName => MediaType.ToString();
     public string MediaUrl { get; set; } = string.Empty;
     public int? PublishYear { get; set; }
+    public string AuthorName { get; set; } = string.Empty;
     public ApprovalStatus ApprovalStatus { get; set; }
     
     public string CreatedBy { get; set; } = string.Empty;
-    public UserInfoDto Author { get; set; } = default!;
+    public UserInfoDto? CreatedByUser { get; set; }
     public DateTime CreatedAt { get; set; }
     
     public string? UpdatedBy { get; set; }

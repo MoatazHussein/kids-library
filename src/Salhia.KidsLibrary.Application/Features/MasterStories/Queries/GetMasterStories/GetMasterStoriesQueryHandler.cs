@@ -58,8 +58,7 @@ public class GetMasterStoriesQueryHandler(
             
             searchPredicate = searchPredicate.Or(x => x.Title.ToLower().Contains(search));
             searchPredicate = searchPredicate.Or(x => x.Content != null && x.Content.ToLower().Contains(search));
-            searchPredicate = searchPredicate.Or(x => x.Author.FirstName.ToLower().Contains(search));
-            searchPredicate = searchPredicate.Or(x => x.Author.LastName != null && x.Author.LastName.ToLower().Contains(search));
+            searchPredicate = searchPredicate.Or(x => x.AuthorName != null && x.AuthorName.ToLower().Contains(search));
             searchPredicate = searchPredicate.Or(x => x.PublishYear.HasValue && x.PublishYear.ToString()!.Contains(search));
             
             predicate = predicate.And(searchPredicate);
@@ -85,7 +84,7 @@ public class GetMasterStoriesQueryHandler(
             Descending = request.Descending,
             Includes = [
                 ms => ms.StoryCategory!,
-                ms => ms.Author!,
+                ms => ms.CreatedByUser!,
                 ms => ms.UpdatedByUser!,
                 ms => ms.Comments
             ]

@@ -40,6 +40,19 @@ public class StoryViewSessionConfiguration : IEntityTypeConfiguration<StoryViewS
         builder.HasIndex(x => x.LastViewAt)
             .HasDatabaseName("IX_StoryViewSessions_LastViewAt");
 
+        // Foreign Key: MasterStory - cascade delete when story is deleted
+        builder.HasOne<MasterStory>()
+            .WithMany(ms => ms.ViewSessions)
+            .HasForeignKey(x => x.MasterStoryId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Foreign Key: User (optional - for authenticated users)
+        builder.HasOne<AppUser>()
+            .WithMany()
+            .HasForeignKey(x => x.UserId)
+            .OnDelete(DeleteBehavior.SetNull)
+            .IsRequired(false);
+
         // Audit Fields
         builder.Property(x => x.CreatedBy)
             .IsRequired(false)

@@ -22,11 +22,13 @@ public class MasterStoryMappingProfile : Profile
         // Queries
         CreateMap<MasterStory, GetMasterStoriesQueryResponse>()
             .ForMember(dest => dest.StoryCategoryTitle, opt => opt.MapFrom(src => src.StoryCategory != null ? src.StoryCategory.Title : null))
-            .ForMember(dest => dest.CommentsCount, opt => opt.MapFrom(src => src.Comments.Count));
+            .ForMember(dest => dest.CommentsCount, opt => opt.MapFrom(src => src.Comments.Count))
+            .ForMember(dest => dest.CreatedByUser, opt => opt.MapFrom(src => src.CreatedByUser));
 
         CreateMap<MasterStory, GetMasterStoryByIdQueryResponse>()
             .ForMember(dest => dest.StoryCategoryTitle, opt => opt.MapFrom(src => src.StoryCategory != null ? src.StoryCategory.Title : null))
             .ForMember(dest => dest.CommentsCount, opt => opt.MapFrom(src => src.Comments.Count))
+            .ForMember(dest => dest.CreatedByUser, opt => opt.MapFrom(src => src.CreatedByUser))
             .ForMember(dest => dest.Comments, opt => opt.Ignore()); // Handled in handler
     }
 }

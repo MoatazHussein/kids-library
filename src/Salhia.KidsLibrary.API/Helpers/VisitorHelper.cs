@@ -2,33 +2,26 @@ namespace Salhia.KidsLibrary.API.Helpers;
 
 public static class VisitorHelper
 {
-    private const string AnonCookieName = "story_anon_id";
-
-    public static string GetVisitorKey(HttpContext httpContext)
+    public static (string visitorKey, string? userId) GetVisitorKey(HttpContext httpContext)
     {
+        // 1) Logged-in user
         if (httpContext.User?.Identity?.IsAuthenticated == true)
         {
             var userId = httpContext.User.FindFirst("sub")?.Value
                          ?? httpContext.User.Identity!.Name!;
-            return $"user:{userId}";
+            return ($"user:{userId}", userId);
         }
 
-        if (!httpContext.Request.Cookies.TryGetValue(AnonCookieName, out var anonId)
-            || string.IsNullOrWhiteSpace(anonId))
+        // 2) Anonymous: from header sent by Vue
+        var anonId = httpContext.Request.Headers["X-Visitor-Id"].FirstOrDefault();
+
+        if (string.IsNullOrWhiteSpace(anonId))
         {
+            // Fallback – should rarely happen
             anonId = Guid.NewGuid().ToString("N");
-
-            var options = new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.None,
-                Expires = DateTimeOffset.UtcNow.AddMonths(6)
-            };
-
-            httpContext.Response.Cookies.Append(AnonCookieName, anonId, options);
         }
 
-        return $"anon:{anonId}";
+        return ($"anon:{anonId}", null);
     }
 }
+

@@ -36,7 +36,7 @@ public class GetMasterStoryByIdQueryHandler(
             [
                 ms => ms.StoryCategory,
                 ms => ms.Comments,
-                ms => ms.Author!,
+                ms => ms.CreatedByUser!,
                 ms => ms.UpdatedByUser!
             ]);
 

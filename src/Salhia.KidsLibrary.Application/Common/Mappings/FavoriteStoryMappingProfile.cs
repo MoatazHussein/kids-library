@@ -26,8 +26,6 @@ public class FavoriteStoryMappingProfile : Profile
             .ForMember(dest => dest.MediaUrl, opt => opt.MapFrom(src => src.MasterStory.MediaUrl))
             .ForMember(dest => dest.PublishYear, opt => opt.MapFrom(src => src.MasterStory.PublishYear))
             .ForMember(dest => dest.ApprovalStatus, opt => opt.MapFrom(src => src.MasterStory.ApprovalStatus))
-            .ForMember(dest => dest.AuthorId, opt => opt.MapFrom(src => src.MasterStory.CreatedBy))
-            .ForMember(dest => dest.Author, opt => opt.MapFrom(src => src.MasterStory.Author))
             .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.MasterStory.CreatedAt))
             .ForMember(dest => dest.CommentsCount, opt => opt.MapFrom(src => src.MasterStory.Comments.Count));
     }

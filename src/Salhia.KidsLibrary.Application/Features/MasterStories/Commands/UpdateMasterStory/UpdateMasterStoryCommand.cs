@@ -13,4 +13,5 @@ public class UpdateMasterStoryCommand : IRequest<Unit>
     public MediaType MediaType { get; set; }
     public string MediaUrl { get; set; } = string.Empty;
     public int? PublishYear { get; set; }
+    public string AuthorName { get; set; } = string.Empty;
 }

@@ -19,6 +19,9 @@ public class CustomStoryConfiguration : IEntityTypeConfiguration<CustomStory>
         builder.Property(cs => cs.Title)
             .HasMaxLength(200);
 
+        builder.Property(cs => cs.AuthorName)
+            .HasMaxLength(200);
+
         builder.Property(cs => cs.Description)
             .HasMaxLength(1000);
 
