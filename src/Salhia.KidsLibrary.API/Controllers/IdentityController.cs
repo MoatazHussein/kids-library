@@ -1,6 +1,7 @@
 ﻿using Salhia.KidsLibrary.Application.Features.Users.Commands.AssignUserRole;
 using Salhia.KidsLibrary.Application.Features.Users.Commands.ChangeUserRole;
 using Salhia.KidsLibrary.Application.Features.Users.Commands.ConfirmEmail;
+using Salhia.KidsLibrary.Application.Features.Users.Commands.DeleteUser;
 using Salhia.KidsLibrary.Application.Features.Users.Commands.DisableUser;
 using Salhia.KidsLibrary.Application.Features.Users.Commands.EnableUser;
 using Salhia.KidsLibrary.Application.Features.Users.Commands.ForgotPassword;
@@ -70,13 +71,13 @@ public class IdentityController(IMediator mediator, IConfiguration configuration
         return Ok(new { message = $"User role changed successfully to {command.NewRole}" });
     }
 
-    [Authorize(Roles = UserRoles.Admin)]
-    [HttpDelete("userRole")]
-    public async Task<IActionResult> UnassignedUserRole(UnassignUserRoleCommand command)
-    {
-        await mediator.Send(command);
-        return NoContent();
-    }
+    //[Authorize(Roles = UserRoles.Admin)]
+    //[HttpDelete("userRole")]
+    //public async Task<IActionResult> UnassignedUserRole(UnassignUserRoleCommand command)
+    //{
+    //    await mediator.Send(command);
+    //    return NoContent();
+    //}
 
     /// <summary>
     /// Disable a user account (user will be logged out on next request)
@@ -98,6 +99,14 @@ public class IdentityController(IMediator mediator, IConfiguration configuration
     {
         await mediator.Send(new EnableUserCommand { UserId = userId });
         return Ok(new { message = "User has been enabled successfully" });
+    }
+
+    [Authorize(Roles = UserRoles.Admin)]
+    [HttpDelete("users/{userId}")]
+    public async Task<IActionResult> DeleteUser([FromRoute] string userId)
+    {
+        await mediator.Send(new DeleteUserCommand { UserId = userId });
+        return Ok(new { message = "User has been deleted successfully" });
     }
 
     [HttpPost("forgot-password")]

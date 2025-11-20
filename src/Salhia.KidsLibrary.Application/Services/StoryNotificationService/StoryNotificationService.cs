@@ -3,7 +3,7 @@ using Salhia.KidsLibrary.Application.Common.Interfaces;
 using Salhia.KidsLibrary.Application.Common.Interfaces.Security;
 using Salhia.KidsLibrary.Domain.Entities;
 
-namespace Salhia.KidsLibrary.Application.Services;
+namespace Salhia.KidsLibrary.Application.Services.StoryNotificationService;
 
 public class StoryNotificationService(
     IUserService userService,
@@ -11,15 +11,23 @@ public class StoryNotificationService(
     ILogger<StoryNotificationService> logger
     ) : IStoryNotificationService
 {
-    public async Task NotifyAdminsOfNewStoryAsync(MasterStory story, string authorId, string categoryTitle, CancellationToken ct = default)
+    public async Task NotifyAdminsOfNewStoryAsync(MasterStory story, string authorId, string categoryTitle, int maxAdmins = 5, CancellationToken ct = default)
     {
-        var admins = await userService.GetAllAdminsAsync(ct);
+        var allAdmins = await userService.GetAllAdminsAsync(ct);
 
-        if (admins.Count == 0)
+        if (allAdmins.Count == 0)
         {
             logger.LogWarning("No admin users found to notify about new story {StoryId}", story.Id);
             return;
         }
+
+        // Select top oldest admins (by CreatedAt ascending)
+        var admins = allAdmins
+            .OrderBy(a => a.CreatedAt)
+            .Take(maxAdmins)
+            .ToList();
+
+        logger.LogInformation("Notifying {Count} admin(s) out of {Total} total admins for story {StoryId}", admins.Count, allAdmins.Count, story.Id);
 
         var author = await userService.FindByIdAsync(authorId, ct);
         var authorName = author != null ? $"{author.FirstName} {author.LastName}" : "A user";

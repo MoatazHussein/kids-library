@@ -83,7 +83,6 @@ public class DashboardController(IMediator mediator) : ControllerBase
     /// </summary>
     /// <param name="period">Time period for analysis (default: Last30Days)</param>
     /// <returns>Dashboard overview with story counts, user counts, engagement totals and rates</returns>
-    [AllowAnonymous]
     [HttpPost("overview")]
     public async Task<ActionResult<GetDashboardOverviewQueryResponse>> GetDashboardOverview(
         [FromQuery] DashboardPeriod period = DashboardPeriod.Last30Days)

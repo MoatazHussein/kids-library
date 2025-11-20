@@ -6,6 +6,7 @@ public class DashboardOverviewDto
     public UserCountsDto UserCounts { get; set; } = null!;
     public EngagementMetricsDto EngagementMetrics { get; set; } = null!;
     public EngagementRatesDto EngagementRates { get; set; } = null!;
+    public Dictionary<string, int> MediaTypeStats { get; set; } = new();
 }
 
 public class StoryCountsDto
@@ -20,8 +21,9 @@ public class StoryCountsDto
 public class UserCountsDto
 {
     public int Total { get; set; }
+    public int ActiveUsers { get; set; }
+    public int InactiveUsers { get; set; }
     public int ActiveUsersInPeriod { get; set; }
-    public int ActiveInPeriod { get; set; }
     public int NewInPeriod { get; set; }
 }
 

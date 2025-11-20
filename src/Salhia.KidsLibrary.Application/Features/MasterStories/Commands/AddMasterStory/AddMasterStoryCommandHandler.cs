@@ -2,6 +2,7 @@ using AutoMapper;
 using MediatR;
 using Salhia.KidsLibrary.Application.Common.Interfaces;
 using Salhia.KidsLibrary.Application.Common.Interfaces.Security;
+using Salhia.KidsLibrary.Application.Services.StoryNotificationService;
 using Salhia.KidsLibrary.Domain.Entities;
 using Salhia.KidsLibrary.Domain.Exceptions;
 
@@ -33,11 +34,12 @@ public class AddMasterStoryCommandHandler(
         await masterStoryRepository.AddAsync(masterStory, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        // Notify all admins about the new story
+        // Notify top 5 oldest admins about the new story
         await notificationService.NotifyAdminsOfNewStoryAsync(
             masterStory, 
             currentUserId ?? string.Empty, 
-            categoryExists.Title, 
+            categoryExists.Title,
+            maxAdmins: 5,
             cancellationToken);
         
         return masterStory.Id;

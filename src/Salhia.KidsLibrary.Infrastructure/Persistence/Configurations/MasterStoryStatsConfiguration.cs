@@ -26,7 +26,7 @@ public class MasterStoryStatsConfiguration : IEntityTypeConfiguration<MasterStor
 
         // One-to-one relationship with MasterStory
         builder.HasOne(mss => mss.MasterStory)
-            .WithOne()
+            .WithOne(x => x.MasterStoryStats)
             .HasForeignKey<MasterStoryStats>(mss => mss.MasterStoryId)
             .OnDelete(DeleteBehavior.Cascade);
 

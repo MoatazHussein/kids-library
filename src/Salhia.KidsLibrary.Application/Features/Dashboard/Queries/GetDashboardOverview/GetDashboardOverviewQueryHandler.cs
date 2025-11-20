@@ -48,8 +48,9 @@ public class GetDashboardOverviewQueryHandler(
             UserCounts = new UserCountsDto
             {
                 Total = overviewData.TotalUsers,
+                ActiveUsers = overviewData.ActiveUsers,
+                InactiveUsers = overviewData.InactiveUsers,
                 ActiveUsersInPeriod = overviewData.ActiveUsersInPeriod,
-                ActiveInPeriod = overviewData.ActiveUsersInPeriod,
                 NewInPeriod = overviewData.NewUsersInPeriod
             },
             EngagementMetrics = new EngagementMetricsDto
@@ -72,7 +73,8 @@ public class GetDashboardOverviewQueryHandler(
                 ViewToShareRate = Math.Round(viewToShareRate, 2),
                 ViewToCommentRate = Math.Round(viewToCommentRate, 2),
                 AverageEngagementScore = Math.Round(avgEngagementScore, 2)
-            }
+            },
+            MediaTypeStats = overviewData.MediaTypeStats,
         };
 
         return new GetDashboardOverviewQueryResponse

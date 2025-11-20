@@ -11,6 +11,8 @@ public class DashboardOverviewData
     
     // User Counts
     public int TotalUsers { get; set; }
+    public int ActiveUsers { get; set; }
+    public int InactiveUsers { get; set; }
     public int ActiveUsersInPeriod { get; set; }
     public int NewUsersInPeriod { get; set; }
     
@@ -28,4 +30,7 @@ public class DashboardOverviewData
     public int TotalComments { get; set; }
     public int TotalRatings { get; set; }
     public decimal TotalAverageRating { get; set; }
+    
+    // Media Type Analysis (for the specified period)
+    public Dictionary<string, int> MediaTypeStats { get; set; } = new();
 }

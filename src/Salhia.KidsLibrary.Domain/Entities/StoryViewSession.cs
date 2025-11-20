@@ -10,4 +10,7 @@ public class StoryViewSession : BaseEntity
     public DateTime LastViewAt { get; set; }
     
     public int ViewCount { get; set; }
+    public MasterStory MasterStory { get; set; } = default!;
+
+
 }

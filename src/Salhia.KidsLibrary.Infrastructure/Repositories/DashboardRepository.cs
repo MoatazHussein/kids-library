@@ -369,6 +369,10 @@ public class DashboardRepository(AppDbContext context, ILogger<DashboardReposito
             s => s.ApprovalStatus == ApprovalStatus.Rejected && s.CreatedAt >= periodFrom, cancellationToken);
 
         var totalUsers = await context.Users.CountAsync(cancellationToken);
+        var activeUsers = await context.Users
+            .CountAsync(u => !u.LockoutEnabled || u.LockoutEnd == null || u.LockoutEnd <= DateTimeOffset.UtcNow, cancellationToken);
+        var InactiveUsers = await context.Users
+            .CountAsync(u => u.LockoutEnabled && u.LockoutEnd != null && u.LockoutEnd > DateTimeOffset.UtcNow, cancellationToken);
         var activeUsersInPeriod = await context.StoryViewSessions
             .Where(vs => vs.LastViewAt >= periodFrom)
             .Select(vs => vs.UserId)
@@ -420,6 +424,19 @@ public class DashboardRepository(AppDbContext context, ILogger<DashboardReposito
             ? (decimal)totalStats.TotalRatingsSum / totalStats.TotalRatings
             : 0;
 
+        // Query 4: Media Type analysis for the period
+        var mediaTypeStats = await context.MasterStories
+            .Where(s => s.CreatedAt >= periodFrom && s.ApprovalStatus == ApprovalStatus.Approved)
+            .GroupBy(s => s.MediaType)
+            .Select(g => new
+            {
+                MediaType = g.Key.ToString(),
+                Count = g.Count()
+            })
+            .ToListAsync(cancellationToken);
+
+        var mediaTypeDict = mediaTypeStats.ToDictionary(m => m.MediaType, m => m.Count);
+
         return new DashboardOverviewData
         {
             // Story counts
@@ -431,6 +448,8 @@ public class DashboardRepository(AppDbContext context, ILogger<DashboardReposito
             
             // User counts
             TotalUsers = totalUsers,
+            ActiveUsers = activeUsers,
+            InactiveUsers = InactiveUsers,
             ActiveUsersInPeriod = activeUsersInPeriod,
             NewUsersInPeriod = newUsersInPeriod,
             
@@ -447,7 +466,10 @@ public class DashboardRepository(AppDbContext context, ILogger<DashboardReposito
             TotalShares = totalStats?.TotalShares ?? 0,
             TotalComments = totalStats?.TotalComments ?? 0,
             TotalRatings = totalStats?.TotalRatings ?? 0,
-            TotalAverageRating = Math.Round(averageRating, 2)
+            TotalAverageRating = Math.Round(averageRating, 2),
+            
+            // Media Type Analysis
+            MediaTypeStats = mediaTypeDict
         };
     }
 

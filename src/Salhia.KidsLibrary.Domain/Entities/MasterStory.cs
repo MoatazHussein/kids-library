@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using Salhia.KidsLibrary.Domain.Enums;
 
 namespace Salhia.KidsLibrary.Domain.Entities;
@@ -32,5 +31,6 @@ public class MasterStory : BaseEntity
     public ICollection<StoryLike> Likes { get; set; } = [];
     public ICollection<StoryShare> Shares { get; set; } = [];
     public ICollection<StoryViewSession> ViewSessions { get; set; } = [];
+    public MasterStoryStats? MasterStoryStats { get; set; } 
 
 }

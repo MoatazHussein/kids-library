@@ -255,6 +255,15 @@ public sealed class UserService(
         return await userManager.IsLockedOutAsync(user);
     }
 
+    public async Task<bool> DeleteUserAsync(string userId, CancellationToken ct = default)
+    {
+        var user = await userManager.FindByIdAsync(userId);
+        if (user is null) return false;
+        
+        var result = await userManager.DeleteAsync(user);
+        return result.Succeeded;
+    }
+
     public async Task<List<AppUser>> GetAllAdminsAsync(CancellationToken ct = default)
     {
         var admins = await userManager.GetUsersInRoleAsync(UserRole.Admin.ToString());
