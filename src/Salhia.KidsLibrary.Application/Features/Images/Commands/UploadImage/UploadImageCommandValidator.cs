@@ -6,7 +6,7 @@ namespace Salhia.KidsLibrary.Application.Features.Images.Commands.UploadImage;
 public class UploadImageCommandValidator : AbstractValidator<UploadImageCommand>
 {
     private static readonly string[] AllowedExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp"];
-    private const byte maxSizeInMB = 2;
+    private const byte maxSizeInMB = 25;
 
     public UploadImageCommandValidator()
     {

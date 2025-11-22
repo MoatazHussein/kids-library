@@ -5,7 +5,7 @@ namespace Salhia.KidsLibrary.Application.Features.Files.Commands.UploadFile;
 public class UploadFileCommandValidator : AbstractValidator<UploadFileCommand>
 {
     private readonly string[] _allowedExtensions = { ".txt", ".pdf" };
-    private const long _maxFileSize = 10 * 1024 * 1024; // 10 MB
+    private const long _maxFileSize = 100 * 1024 * 1024; 
 
     public UploadFileCommandValidator()
     {

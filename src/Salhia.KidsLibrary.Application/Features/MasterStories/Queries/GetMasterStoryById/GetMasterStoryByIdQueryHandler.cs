@@ -16,6 +16,7 @@ public class GetMasterStoryByIdQueryHandler(
     IRepository<MasterStory> masterStoryRepository,
     IRepository<StoryComment> commentRepository,
     IRepository<StoryLike> storyLikeRepository,
+    IRepository<FavoriteStory> favoriteStoryRepository,
     IMasterStoryStatsService statsService,
     ICurrentUserService currentUserService,
     ILogger<GetMasterStoryByIdQueryHandler> logger,
@@ -84,12 +85,18 @@ public class GetMasterStoryByIdQueryHandler(
         // Get like statistics from stats service
         response.LikesCount = await statsService.GetLikesCountAsync(request.Id, cancellationToken);
 
-        // Check if current user liked this story (only for authenticated users)
         if (currentUserService.IsAuthenticated)
         {
             var currentUserId = currentUserService.UserId;
+
+        // Check if current user liked this story 
             response.IsLikedByCurrentUser = await storyLikeRepository.AnyAsync(
                 l => l.MasterStoryId == request.Id && l.UserId == currentUserId,
+                cancellationToken);
+
+        // Check if current user added this story to favorites 
+            response.IsFavoriteByCurrentUser = await favoriteStoryRepository.AnyAsync(
+                fav => fav.MasterStoryId == request.Id && fav.UserId == currentUserId,
                 cancellationToken);
         }
 
