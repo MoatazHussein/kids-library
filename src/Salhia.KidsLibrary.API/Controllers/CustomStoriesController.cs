@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Salhia.KidsLibrary.Application.Common.Interfaces;
 using Salhia.KidsLibrary.Application.Features.CustomStories.Commands.AddCustomStory;
 using Salhia.KidsLibrary.Application.Features.CustomStories.Commands.DeleteCustomStory;
 using Salhia.KidsLibrary.Application.Features.CustomStories.Commands.UpdateCustomStory;
@@ -12,7 +13,7 @@ namespace Salhia.KidsLibrary.API.Controllers;
 [ApiController]
 [Route("api/[Controller]")]
 [Authorize]
-public class CustomStoriesController(IMediator mediator) : ControllerBase
+public class CustomStoriesController(IMediator mediator, IPdfService pdfService) : ControllerBase
 {
     [AllowAnonymous]
     [HttpPost("GetById")]
@@ -54,5 +55,16 @@ public class CustomStoriesController(IMediator mediator) : ControllerBase
     {
         await mediator.Send(new DeleteCustomStoryCommand { Id = id });
         return StatusCode(200, $"Deleted successfully");
+    }
+
+    [AllowAnonymous]
+    [HttpGet("DownloadPdf/{id}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> DownloadPdf([FromRoute] string id, CancellationToken cancellationToken)
+    {
+        var pdfBytes = await pdfService.GenerateCustomStoryPdfAsync(id, cancellationToken);
+
+        return File(pdfBytes, "application/pdf", $"custom-story-{id}.pdf");
     }
 }

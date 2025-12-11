@@ -5,6 +5,7 @@ using Salhia.KidsLibrary.Infrastructure.Persistence;
 using Salhia.KidsLibrary.Infrastructure.Repositories;
 using Salhia.KidsLibrary.Infrastructure.Seeders;
 using Salhia.KidsLibrary.Infrastructure.Services.Email;
+using Salhia.KidsLibrary.Infrastructure.Services.Pdf;
 using Salhia.KidsLibrary.Infrastructure.Services.Security;
 using Salhia.KidsLibrary.Infrastructure.Services.Storage;
 using Salhia.KidsLibrary.Infrastructure.Services.TimeConversion;
@@ -14,12 +15,16 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using QuestPDF.Infrastructure;
 
 namespace Salhia.KidsLibrary.Infrastructure.Extensions;
 public static class ServiceCollectionExtensions
 {
     public static void AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
+        // Configure QuestPDF license
+        QuestPDF.Settings.License = LicenseType.Community;
+
         var connectionString = configuration.GetConnectionString("DefaultConnection");
 
         services.AddDbContext<AppDbContext>(options =>
@@ -51,6 +56,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IStorageService, StorageService>();
         services.AddScoped<IStartupTask, EnsureStorageFoldersTask>();
         
+        services.AddScoped<IPdfService, PdfService>();
 
         services.AddScoped<IDashboardRepository, DashboardRepository>();
 
