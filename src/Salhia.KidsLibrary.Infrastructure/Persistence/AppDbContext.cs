@@ -20,6 +20,8 @@ public class AppDbContext : IdentityDbContext<AppUser, AppRole, string>
     public DbSet<StoryShare> StoryShares { get; set; }
     public DbSet<StoryViewSession> StoryViewSessions { get; set; }
     public DbSet<MasterStoryStats> MasterStoryStats { get; set; }
+    public DbSet<AIStory> AIStories { get; set; }
+    public DbSet<AIStorySlide> AIStorySlides { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

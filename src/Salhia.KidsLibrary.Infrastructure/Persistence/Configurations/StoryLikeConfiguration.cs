@@ -27,7 +27,7 @@ public class StoryLikeConfiguration : IEntityTypeConfiguration<StoryLike>
         builder.HasOne(x => x.User)
             .WithMany()
             .HasForeignKey(x => x.UserId)
-            .OnDelete(DeleteBehavior.SetNull);
+            .OnDelete(DeleteBehavior.Restrict);
 
         // Foreign Key: MasterStory
         builder.HasOne(x => x.MasterStory)

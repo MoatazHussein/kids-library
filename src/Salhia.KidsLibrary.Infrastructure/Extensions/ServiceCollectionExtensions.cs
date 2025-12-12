@@ -1,9 +1,12 @@
 ﻿using Salhia.KidsLibrary.Application.Common.Interfaces;
+using Salhia.KidsLibrary.Application.Common.Interfaces.AI;
 using Salhia.KidsLibrary.Application.Common.Interfaces.Security;
 using Salhia.KidsLibrary.Domain.Entities;
 using Salhia.KidsLibrary.Infrastructure.Persistence;
 using Salhia.KidsLibrary.Infrastructure.Repositories;
 using Salhia.KidsLibrary.Infrastructure.Seeders;
+using Salhia.KidsLibrary.Infrastructure.Services.AI.Configuration;
+using Salhia.KidsLibrary.Infrastructure.Services.AI.OpenAI;
 using Salhia.KidsLibrary.Infrastructure.Services.Email;
 using Salhia.KidsLibrary.Infrastructure.Services.Pdf;
 using Salhia.KidsLibrary.Infrastructure.Services.Security;
@@ -59,6 +62,12 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IPdfService, PdfService>();
 
         services.AddScoped<IDashboardRepository, DashboardRepository>();
+
+        // Configure AI Services
+        services.Configure<AIServiceOptions>(configuration.GetSection(AIServiceOptions.SectionName));
+        
+        // Register OpenAI service with HttpClient
+        services.AddHttpClient<IOpenAIService, OpenAIService>();
 
     }
 
