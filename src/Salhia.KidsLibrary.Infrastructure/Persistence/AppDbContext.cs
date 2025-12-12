@@ -22,6 +22,7 @@ public class AppDbContext : IdentityDbContext<AppUser, AppRole, string>
     public DbSet<MasterStoryStats> MasterStoryStats { get; set; }
     public DbSet<AIStory> AIStories { get; set; }
     public DbSet<AIStorySlide> AIStorySlides { get; set; }
+    public DbSet<SystemSetting> SystemSettings { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

@@ -1,18 +1,12 @@
-﻿using System.Globalization;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Routing;
-using Microsoft.EntityFrameworkCore;
-using Salhia.KidsLibrary.Domain.Constants;
-using Salhia.KidsLibrary.Domain.Entities;
+﻿using Microsoft.EntityFrameworkCore;
 using Salhia.KidsLibrary.Infrastructure.Persistence;
 
 namespace Salhia.KidsLibrary.Infrastructure.Seeders;
 
-internal class AppSeeder(AppDbContext dbContext) : IAppSeeder
+internal class AppSeeder(AppDbContext dbContext, IEnumerable<ICustomSeeder> seeders) : IAppSeeder
 {
     public async Task Seed()
     {
-
         if (dbContext.Database.GetPendingMigrations().Any())
         {
             await dbContext.Database.MigrateAsync();
@@ -20,42 +14,12 @@ internal class AppSeeder(AppDbContext dbContext) : IAppSeeder
 
         if (await dbContext.Database.CanConnectAsync())
         {
+            var orderedSeeders = seeders.OrderBy(s => s.Order);
 
-            if (!dbContext.Roles.Any())
+            foreach (var seeder in orderedSeeders)
             {
-                var roles = GetRoles();
-                dbContext.Roles.AddRange(roles);
-                await dbContext.SaveChangesAsync();
+                await seeder.SeedAsync(dbContext, CancellationToken.None);
             }
-
         }
-    }
-
-    private IEnumerable<AppRole> GetRoles()
-    {
-        List<AppRole> roles =
-            [
-
-            new AppRole
-            {
-                Id =  Ulid.NewUlid().ToString(),
-                Name = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(UserRoles.Admin.ToLower()),
-                NormalizedName  = UserRoles.Admin.ToUpper(),
-            },
-            new AppRole
-            {
-                Id =  Ulid.NewUlid().ToString(),
-                Name = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(UserRoles.Teacher.ToLower()),
-                NormalizedName = UserRoles.Teacher.ToUpper(),
-            },
-            new AppRole
-            {
-                Id =  Ulid.NewUlid().ToString(),
-                Name = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(UserRoles.Student.ToLower()),
-                NormalizedName = UserRoles.Student.ToUpper(),
-            },
-            ];
-
-        return roles;
     }
 }

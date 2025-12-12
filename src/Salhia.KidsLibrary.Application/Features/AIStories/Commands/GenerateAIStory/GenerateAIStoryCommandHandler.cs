@@ -16,6 +16,7 @@ public class GenerateAIStoryCommandHandler(
     IOpenAIService openAIService,
     ICurrentUserService currentUserService,
     IUnitOfWork unitOfWork,
+    IRepository<SystemSetting> systemSettingRepository,
     ILogger<GenerateAIStoryCommandHandler> logger) : IRequestHandler<GenerateAIStoryCommand, string>
 {
     public async Task<string> Handle(GenerateAIStoryCommand request, CancellationToken cancellationToken)
@@ -28,7 +29,30 @@ public class GenerateAIStoryCommandHandler(
             throw new AppException($"CustomStory with Id {request.CustomStoryId} not found");
         }
 
-        // 2. Generate random slides count (5-8)
+        // 2. Check Rate Limit
+        var currentUserId = currentUserService.UserId ?? string.Empty;
+        
+        // Get the first (and only) settings row
+        var settings = await systemSettingRepository.FirstOrDefaultAsync(x => true, cancellationToken);
+
+        if (settings is null)
+        {
+            throw new AppException("System settings not configured for AI story limits");
+        }
+
+        var limitDate = DateTime.UtcNow.AddDays(-settings.AIStoryLimitDays);
+        var recentStoriesCount = await aiStoryRepository.CountAsync(
+            s => s.CreatedBy == currentUserId && s.CreatedAt >= limitDate, 
+            cancellationToken);
+
+        if (recentStoriesCount >= settings.AIStoryLimitCount)
+        {
+            logger.LogWarning("User {UserId} exceeded AI story limit. Count: {Count}, Limit: {Limit}", 
+                currentUserId, recentStoriesCount, settings.AIStoryLimitCount);
+            throw new AppException($"You have reached the limit of {settings.AIStoryLimitCount} AI stories every {settings.AIStoryLimitDays} days.");
+        }
+
+        // 3. Generate random slides count (5-8)
         var random = new Random();
         var slidesCount = random.Next(5, 9); // 5 to 8 inclusive
 
@@ -36,8 +60,7 @@ public class GenerateAIStoryCommandHandler(
             "Starting AI story generation. CustomStoryId={CustomStoryId}, StoryName={StoryName}, HeroName={HeroName}, SlidesCount={SlidesCount}",
             request.CustomStoryId, request.StoryName, request.HeroName, slidesCount);
 
-        // 3. Create AIStory record
-        var currentUserId = currentUserService.UserId ?? string.Empty;
+        // 4. Create AIStory record
         var aiStory = new AIStory
         {
             StoryName = request.StoryName,

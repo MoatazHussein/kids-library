@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Salhia.KidsLibrary.Application.Features.AIStories.Commands.GenerateAIStory;
+using Salhia.KidsLibrary.Application.Features.AIStories.Queries.GenerateAIStoryPdf;
 
 namespace Salhia.KidsLibrary.API.Controllers;
 
@@ -36,5 +37,14 @@ public class AIStoriesController(IMediator mediator, ILogger<AIStoriesController
             aiStoryId = aiStoryId,
             status = "Slides are being generated in the background"
         });
+    }
+    [HttpGet("DownloadPdf/{id}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> DownloadPdf([FromRoute] string id)
+    {
+        var pdfBytes = await mediator.Send(new GenerateAIStoryPdfQuery(id));
+
+        return File(pdfBytes, "application/pdf", $"ai-story-{id}.pdf");
     }
 }

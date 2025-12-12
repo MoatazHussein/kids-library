@@ -6,10 +6,13 @@ using Salhia.KidsLibrary.Application.Common.Interfaces;
 using Salhia.KidsLibrary.Domain.Entities;
 using Salhia.KidsLibrary.Domain.Exceptions;
 
+using Salhia.KidsLibrary.Infrastructure.Services.Pdf.Models;
+
 namespace Salhia.KidsLibrary.Infrastructure.Services.Pdf;
 
 public class PdfService(
     IRepository<CustomStory> customStoryRepository,
+    IRepository<AIStory> aiStoryRepository,
     ILogger<PdfService> logger
     ) : IPdfService
 {
@@ -28,14 +31,82 @@ public class PdfService(
             throw new NotFoundException(nameof(CustomStory), customStoryId);
         }
 
-        // Sort items by CreatedAt (you can add an Order field later for custom ordering)
+        // Sort items by CreatedAt
         var storyItems = customStory.CustomStoryItems
             .OrderBy(item => item.CreatedAt)
+            .Select(item => new PdfStoryItem
+            {
+                Title = item.Title,
+                Description = item.Description,
+                ImageUrl = item.ImageUrl
+            })
             .ToList();
 
-        logger.LogInformation("Generating PDF with {PageCount} pages for story '{Title}'",
-            storyItems.Count, customStory.Title);
+        var pdfData = new PdfStoryData
+        {
+            Title = customStory.Title,
+            AuthorName = customStory.AuthorName,
+            Description = customStory.Description,
+            Items = storyItems
+        };
 
+        return GenerateCustomStoryLayout(pdfData);
+    }
+
+    public async Task<byte[]> GenerateAIStoryPdfAsync(string aiStoryId, CancellationToken cancellationToken = default)
+    {
+        logger.LogInformation("Generating PDF for AI story {StoryId}", aiStoryId);
+
+        var aiStory = await aiStoryRepository.GetByIdAsync(
+            aiStoryId,
+            cancellationToken,
+            [s => s.AIStorySlides, s => s.CreatedByUser]);
+
+        if (aiStory == null)
+        {
+            throw new NotFoundException(nameof(AIStory), aiStoryId);
+        }
+
+        var storyItems = aiStory.AIStorySlides
+            .OrderBy(item => item.Index)
+            .Select(item => new PdfStoryItem
+            {
+                Title = item.Title,
+                Description = item.Description,
+                ImageUrl = item.ImageUrl
+            })
+            .ToList();
+
+        var pdfData = new PdfStoryData
+        {
+            Title = aiStory.StoryName,
+            AuthorName = aiStory.CreatedByUser?.FirstName ?? "AI Author",
+            Description = $"البطل : {aiStory.HeroName}",
+            Items = storyItems
+        };
+
+        return GenerateAIStoryLayout(pdfData);
+    }
+
+    private byte[] GenerateCustomStoryLayout(PdfStoryData data)
+    {
+        logger.LogInformation("Generating Custom Story PDF with {PageCount} pages for story '{Title}'",
+            data.Items.Count, data.Title);
+
+        return GeneratePdfDocument(data);
+    }
+
+    private byte[] GenerateAIStoryLayout(PdfStoryData data)
+    {
+        logger.LogInformation("Generating AI Story PDF with {PageCount} pages for story '{Title}'",
+            data.Items.Count, data.Title);
+
+        // In the future, this layout can be customized specifically for AI stories
+        return GeneratePdfDocument(data);
+    }
+
+    private byte[] GeneratePdfDocument(PdfStoryData data)
+    {
         // Generate PDF using QuestPDF
         var pdfBytes = Document.Create(container =>
         {
@@ -46,7 +117,7 @@ public class PdfService(
                 page.DefaultTextStyle(x => x.FontSize(12).FontFamily("Arial").DirectionFromRightToLeft());
 
                 page.Header()
-                    .Text(customStory.Title)
+                    .Text(data.Title)
                     .FontSize(20)
                     .Bold()
                     .AlignCenter();
@@ -55,22 +126,23 @@ public class PdfService(
                     .Column(column =>
                     {
                         // Cover page
-                        column.Item().PageBreak();
-                        column.Item().AlignCenter().Text(customStory.Title).FontSize(24).Bold();
-                        column.Item().PaddingTop(20).AlignCenter().Text($"المؤلف: {customStory.AuthorName}").FontSize(16);
+                        column.Item().PaddingTop(20).AlignCenter().Text($"المؤلف: {data.AuthorName}").FontSize(16);
                         
-                        if (!string.IsNullOrEmpty(customStory.Description))
+                        if (!string.IsNullOrEmpty(data.Description))
                         {
-                            column.Item().PaddingTop(20).AlignRight().Text(customStory.Description).FontSize(12);
+                            column.Item().PaddingTop(20).AlignRight().Text(data.Description).FontSize(12);
                         }
 
                         // Story items (one per page)
-                        foreach (var item in storyItems)
+                        foreach (var item in data.Items)
                         {
                             column.Item().PageBreak();
                             
                             // Item title
-                            column.Item().AlignRight().Text(item.Title).FontSize(18).Bold();
+                            if (!string.IsNullOrEmpty(item.Title))
+                            {
+                                column.Item().AlignRight().Text(item.Title).FontSize(18).Bold();
+                            }
 
                             // Item image (if exists)
                             if (!string.IsNullOrEmpty(item.ImageUrl))
@@ -78,8 +150,6 @@ public class PdfService(
                                 try
                                 {
                                     var imagePath = GetLocalImagePath(item.ImageUrl);
-                                    logger.LogInformation("Item ImageUrl: {ImageUrl}", item.ImageUrl);
-                                    logger.LogInformation("Resolved local path: {ImagePath}", imagePath);
                                     
                                     if (!string.IsNullOrEmpty(imagePath) && File.Exists(imagePath))
                                     {
@@ -89,18 +159,11 @@ public class PdfService(
                                             .AlignCenter()
                                             .MaxHeight(300)
                                             .Image(imagePath);
-                                        
-                                        logger.LogInformation("Image loaded successfully: {ImagePath}", imagePath);
-                                    }
-                                    else
-                                    {
-                                        logger.LogWarning("Image file not found: {ImagePath}", imagePath);
                                     }
                                 }
                                 catch (Exception ex)
                                 {
-                                    logger.LogError(ex, "Failed to load image {ImageUrl}",
-                                        item.ImageUrl);
+                                    logger.LogError(ex, "Failed to load image {ImageUrl}", item.ImageUrl);
                                 }
                             }
 
@@ -127,9 +190,6 @@ public class PdfService(
                     });
             });
         }).GeneratePdf();
-
-        logger.LogInformation("PDF generated successfully for story {StoryId}, size: {Size} bytes",
-            customStoryId, pdfBytes.Length);
 
         return pdfBytes;
     }

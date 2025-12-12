@@ -49,6 +49,12 @@ public static class ServiceCollectionExtensions
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
         services.AddScoped<IAppSeeder, AppSeeder>();
+        
+        services.Scan(scan => scan
+            .FromAssemblyOf<ICustomSeeder>()
+            .AddClasses(classes => classes.AssignableTo<ICustomSeeder>())
+            .AsImplementedInterfaces()
+            .WithScopedLifetime());
 
         services.AddScoped<ITimeZoneConverter, TimeZoneConverter>();
         services.AddScoped<IUnitOfWork, EfUnitOfWork>();

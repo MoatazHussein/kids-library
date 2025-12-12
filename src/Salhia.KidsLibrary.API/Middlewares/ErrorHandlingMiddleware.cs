@@ -35,6 +35,7 @@ public class ErrorHandlingMiddleware(ILogger<ErrorHandlingMiddleware> logger) : 
         }
         catch (DbUpdateException ex) 
         {
+            logger.LogError(ex, ex.Message);
             context.Response.StatusCode = 500;
             await context.Response.WriteAsync("Database update failed");
         }
