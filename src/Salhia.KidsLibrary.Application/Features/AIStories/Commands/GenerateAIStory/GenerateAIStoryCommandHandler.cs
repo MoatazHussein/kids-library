@@ -1,8 +1,10 @@
 using MediatR;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Salhia.KidsLibrary.Application.Common.Interfaces;
 using Salhia.KidsLibrary.Application.Common.Interfaces.AI;
 using Salhia.KidsLibrary.Application.Common.Interfaces.Security;
+using Salhia.KidsLibrary.Application.Services.AIStoryImageProcessing;
 using Salhia.KidsLibrary.Domain.Entities;
 using Salhia.KidsLibrary.Domain.Enums;
 using Salhia.KidsLibrary.Domain.Exceptions;
@@ -17,6 +19,7 @@ public class GenerateAIStoryCommandHandler(
     ICurrentUserService currentUserService,
     IUnitOfWork unitOfWork,
     IRepository<SystemSetting> systemSettingRepository,
+    IServiceProvider serviceProvider,
     ILogger<GenerateAIStoryCommandHandler> logger) : IRequestHandler<GenerateAIStoryCommand, string>
 {
     public async Task<string> Handle(GenerateAIStoryCommand request, CancellationToken cancellationToken)
@@ -31,7 +34,7 @@ public class GenerateAIStoryCommandHandler(
 
         // 2. Check Rate Limit
         var currentUserId = currentUserService.UserId ?? string.Empty;
-        
+
         // Get the first (and only) settings row
         var settings = await systemSettingRepository.FirstOrDefaultAsync(x => true, cancellationToken);
 
@@ -42,12 +45,12 @@ public class GenerateAIStoryCommandHandler(
 
         var limitDate = DateTime.UtcNow.AddDays(-settings.AIStoryLimitDays);
         var recentStoriesCount = await aiStoryRepository.CountAsync(
-            s => s.CreatedBy == currentUserId && s.CreatedAt >= limitDate, 
+            s => s.CreatedBy == currentUserId && s.CreatedAt >= limitDate,
             cancellationToken);
 
         if (recentStoriesCount >= settings.AIStoryLimitCount)
         {
-            logger.LogWarning("User {UserId} exceeded AI story limit. Count: {Count}, Limit: {Limit}", 
+            logger.LogWarning("User {UserId} exceeded AI story limit. Count: {Count}, Limit: {Limit}",
                 currentUserId, recentStoriesCount, settings.AIStoryLimitCount);
             throw new AppException($"You have reached the limit of {settings.AIStoryLimitCount} AI stories every {settings.AIStoryLimitDays} days.");
         }
@@ -56,7 +59,7 @@ public class GenerateAIStoryCommandHandler(
         var random = new Random();
         var slidesCount = random.Next(5, 9); // 5 to 8 inclusive
 
-        logger.LogInformation(
+        logger.LogDebug(
             "Starting AI story generation. CustomStoryId={CustomStoryId}, StoryName={StoryName}, HeroName={HeroName}, SlidesCount={SlidesCount}",
             request.CustomStoryId, request.StoryName, request.HeroName, slidesCount);
 
@@ -92,7 +95,7 @@ public class GenerateAIStoryCommandHandler(
                 Title = slideDto.Title,
                 Description = slideDto.Description,
                 ImagePrompt = slideDto.ImagePrompt,
-                ImageUrl = string.Empty, // Will be filled by background service
+                ImageUrl = string.Empty, 
                 Status = AIStorySlideStatus.Pending,
                 AIStoryId = aiStory.Id,
                 CreatedBy = currentUserId,
@@ -110,6 +113,35 @@ public class GenerateAIStoryCommandHandler(
             "Successfully created AIStory {AIStoryId} with {SlideCount} slides in Pending status",
             aiStory.Id, slides.Count);
 
+
+        // 7. Trigger immediate processing (fire-and-forget)
+        TriggerImmediateProcessing(aiStory.Id);
+
         return aiStory.Id;
     }
+
+    private void TriggerImmediateProcessing(string AIStoryId)
+    {
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                // Create a new scope to avoid using disposed DbContext from the main request
+                // Fire-and-forget tasks need their own scope since the handler's scope is disposed after response
+                using var scope = serviceProvider.CreateScope();
+                var processingService = scope.ServiceProvider
+                    .GetRequiredService<IAIStoryImageProcessingService>();
+
+                await processingService.ProcessStoryImmediatelyAsync(AIStoryId, CancellationToken.None);
+
+                logger.LogInformation("Immediate processing completed for story {StoryId}", AIStoryId);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error in immediate processing for story {StoryId}", AIStoryId);
+            }
+        }, CancellationToken.None);
+    }
+
 }

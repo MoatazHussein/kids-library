@@ -2,9 +2,10 @@
 using FluentValidation.AspNetCore;
 using Microsoft.Extensions.DependencyInjection;
 using Salhia.KidsLibrary.Application.Services.MasterStoryStatsService;
-using Salhia.KidsLibrary.Application.Services.StatsSyncService;
+using Salhia.KidsLibrary.Application.Services.StatsSync;
 using Salhia.KidsLibrary.Application.Services.StoryNotificationService;
 using Salhia.KidsLibrary.Application.Services.StoryViewService;
+using Salhia.KidsLibrary.Infrastructure.Services.StatsSync;
 
 namespace Salhia.KidsLibrary.Application.Extensions;
 

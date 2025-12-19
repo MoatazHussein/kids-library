@@ -1,18 +1,20 @@
 using Microsoft.Extensions.Logging;
 using Salhia.KidsLibrary.Application.Common.Interfaces;
+using Salhia.KidsLibrary.Application.Services.StatsSync;
 using Salhia.KidsLibrary.Domain.Entities;
 using Salhia.KidsLibrary.Domain.Enums;
+using Salhia.KidsLibrary.Domain.Exceptions;
 
-namespace Salhia.KidsLibrary.Application.Services.StatsSyncService;
+namespace Salhia.KidsLibrary.Infrastructure.Services.StatsSync;
 
 public class StatsSyncService(
     IRepository<MasterStory> storyRepository,
     IRepository<MasterStoryStats> statsRepository,
     IUnitOfWork unitOfWork,
     ILogger<StatsSyncService> logger
-    ) : IStatsSyncService
+) : IStatsSyncService
 {
-    public async Task SyncStatsAsync(CancellationToken cancellationToken = default)
+    public async Task<SyncStatsResult> SyncAllStatsAsync(CancellationToken cancellationToken = default)
     {
         logger.LogInformation("Starting full stats synchronization");
 
@@ -42,7 +44,6 @@ public class StatsSyncService(
 
         foreach (var story in stories)
         {
-            // O(1) lookup instead of database query
             statsDict.TryGetValue(story.Id, out var stats);
 
             // Calculate actual counts from real data
@@ -54,7 +55,6 @@ public class StatsSyncService(
 
             if (stats == null)
             {
-                // Create new stats record
                 stats = new MasterStoryStats
                 {
                     MasterStoryId = story.Id,
@@ -69,8 +69,7 @@ public class StatsSyncService(
 
                 await statsRepository.AddAsync(stats, cancellationToken);
                 createdCount++;
-                logger.LogInformation("Created stats for story {StoryId}: R={Ratings}, L={Likes}, S={Shares}, V={Views}",
-                    story.Id, actualRatingsCount, actualLikesCount, actualSharesCount, actualTotalViews);
+                logger.LogDebug("Created stats for story {StoryId}", story.Id);
             }
             else
             {
@@ -91,8 +90,7 @@ public class StatsSyncService(
 
                     await statsRepository.UpdateAsync(stats);
                     updatedCount++;
-                    logger.LogInformation("Updated stats for story {StoryId}: R={Ratings}, L={Likes}, S={Shares}, V={Views}",
-                        story.Id, actualRatingsCount, actualLikesCount, actualSharesCount, actualTotalViews);
+                    logger.LogDebug("Updated stats for story {StoryId}", story.Id);
                 }
             }
 
@@ -104,9 +102,17 @@ public class StatsSyncService(
         logger.LogInformation(
             "Stats sync completed: {TotalSynced} stories processed, {Created} created, {Updated} updated",
             syncedCount, createdCount, updatedCount);
+
+        return new SyncStatsResult
+        {
+            TotalSynced = syncedCount,
+            Created = createdCount,
+            Updated = updatedCount,
+            Message = "Stats synchronization completed successfully"
+        };
     }
 
-    public async Task SyncStoryStatsAsync(string storyId, CancellationToken cancellationToken = default)
+    public async Task<SyncStatsResult> SyncStoryStatsAsync(string storyId, CancellationToken cancellationToken = default)
     {
         logger.LogInformation("Syncing stats for story {StoryId}", storyId);
 
@@ -123,7 +129,7 @@ public class StatsSyncService(
         if (story == null)
         {
             logger.LogWarning("Story {StoryId} not found for stats sync", storyId);
-            return;
+            throw new AppException($"Story with ID {storyId} not found");
         }
 
         var stats = await statsRepository.FirstOrDefaultAsync(
@@ -136,6 +142,9 @@ public class StatsSyncService(
         var actualLikesCount = story.Likes.Count;
         var actualSharesCount = story.Shares.Count;
         var actualTotalViews = story.ViewSessions.Sum(vs => vs.ViewCount);
+
+        var created = 0;
+        var updated = 0;
 
         if (stats == null)
         {
@@ -152,6 +161,7 @@ public class StatsSyncService(
             };
 
             await statsRepository.AddAsync(stats, cancellationToken);
+            created = 1;
             logger.LogInformation("Created stats for story {StoryId}", storyId);
         }
         else
@@ -165,9 +175,18 @@ public class StatsSyncService(
             stats.UpdatedBy = "system";
 
             await statsRepository.UpdateAsync(stats);
+            updated = 1;
             logger.LogInformation("Updated stats for story {StoryId}", storyId);
         }
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return new SyncStatsResult
+        {
+            TotalSynced = 1,
+            Created = created,
+            Updated = updated,
+            Message = $"Stats for story {storyId} synchronized successfully"
+        };
     }
 }

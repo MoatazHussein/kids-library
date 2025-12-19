@@ -6,6 +6,8 @@ using Salhia.KidsLibrary.Infrastructure.Extensions;
 using Salhia.KidsLibrary.Infrastructure.Seeders;
 using Microsoft.Extensions.FileProviders;
 using Serilog;
+using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +25,21 @@ builder.Services.AddCors(options =>
         .AllowAnyMethod()
         .AllowCredentials()
     );
+});
+
+// Add rate limiting
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddSlidingWindowLimiter("AIStoryGenerationPolicy", opt =>
+    {
+        opt.PermitLimit = 1;
+        opt.Window = TimeSpan.FromMinutes(1);
+        opt.SegmentsPerWindow = 6; // Divides the window into 6 segments of 10 seconds each
+        opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        opt.QueueLimit = 0; // No queuing, reject immediately if limit exceeded
+    });
+    
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 });
 
 var app = builder.Build();
@@ -77,6 +94,8 @@ app.UseStaticFiles(new StaticFileOptions()
 
 app.UseHttpsRedirection();
 app.UseCors("AllowSpecificOrigin");
+
+app.UseRateLimiter();
 
 app.UseAuthentication();
 app.UseMiddleware<UserLockoutCheckMiddleware>();

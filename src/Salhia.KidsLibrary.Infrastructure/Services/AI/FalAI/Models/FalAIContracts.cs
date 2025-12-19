@@ -33,10 +33,19 @@ public class FalAIImageRequest
 public class FalAIImageResponse
 {
     [JsonPropertyName("images")]
-    public List<FalAIImage> Images { get; set; } = [];
+    public List<GeneratedImage> Images { get; set; } = [];
+    
+    [JsonPropertyName("timings")]
+    public ResponseTimings? Timings { get; set; }
+    
+    [JsonPropertyName("seed")]
+    public long? Seed { get; set; }
+    
+    [JsonPropertyName("prompt")]
+    public string? Prompt { get; set; }
 }
 
-public class FalAIImage
+public class GeneratedImage
 {
     [JsonPropertyName("url")]
     public string Url { get; set; } = default!;
@@ -49,6 +58,12 @@ public class FalAIImage
     
     [JsonPropertyName("content_type")]
     public string ContentType { get; set; } = default!;
+}
+
+public class ResponseTimings
+{
+    [JsonPropertyName("inference")]
+    public double Inference { get; set; }
 }
 
 #endregion
