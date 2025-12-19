@@ -20,9 +20,9 @@ public class GenerateAIStoryCommandHandler(
     IUnitOfWork unitOfWork,
     IRepository<SystemSetting> systemSettingRepository,
     IServiceProvider serviceProvider,
-    ILogger<GenerateAIStoryCommandHandler> logger) : IRequestHandler<GenerateAIStoryCommand, string>
+    ILogger<GenerateAIStoryCommandHandler> logger) : IRequestHandler<GenerateAIStoryCommand, GenerateAIStoryCommandResponse>
 {
-    public async Task<string> Handle(GenerateAIStoryCommand request, CancellationToken cancellationToken)
+    public async Task<GenerateAIStoryCommandResponse> Handle(GenerateAIStoryCommand request, CancellationToken cancellationToken)
     {
         // 1. Validate CustomStory exists
         var customStory = await customStoryRepository.GetByIdAsync(request.CustomStoryId, cancellationToken);
@@ -117,7 +117,12 @@ public class GenerateAIStoryCommandHandler(
         // 7. Trigger immediate processing (fire-and-forget)
         TriggerImmediateProcessing(aiStory.Id);
 
-        return aiStory.Id;
+        return new GenerateAIStoryCommandResponse
+        {
+            AIStoryId = aiStory.Id,
+            Message = "AI story generation started successfully",
+            Status = "Slides are being generated in the background"
+        };
     }
 
     private void TriggerImmediateProcessing(string AIStoryId)

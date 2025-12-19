@@ -2,7 +2,6 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
-using Salhia.KidsLibrary.Application.Common.Interfaces.AI;
 using Salhia.KidsLibrary.Application.Features.AIStories.Commands.GenerateAIStory;
 using Salhia.KidsLibrary.Application.Features.AIStories.Commands.RetryAIStorySlide;
 using Salhia.KidsLibrary.Application.Features.AIStories.Queries.GenerateAIStoryPdf;
@@ -15,7 +14,6 @@ namespace Salhia.KidsLibrary.API.Controllers;
 [Authorize]
 public class AIStoriesController(
     IMediator mediator,
-    IFalAIService falAIService,
     ILogger<AIStoriesController> logger) : ControllerBase
 {
     [HttpPost("GetById")]
@@ -33,16 +31,9 @@ public class AIStoriesController(
     [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
     public async Task<IActionResult> Generate(GenerateAIStoryCommand command)
     {
-        string aiStoryId = await mediator.Send(command);
+        var response = await mediator.Send(command);
         
-        logger.LogInformation("AI story generated successfully. AIStoryId={AIStoryId}", aiStoryId);
-        
-        return StatusCode(201, new 
-        { 
-            message = "AI story generation started successfully",
-            aiStoryId = aiStoryId,
-            status = "Slides are being generated in the background"
-        });
+        return Ok(response);
     }
 
     [HttpPost("Slides/{slideId}/Retry")]
