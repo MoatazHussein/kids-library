@@ -13,7 +13,8 @@ namespace Salhia.KidsLibrary.Infrastructure.Services.Pdf;
 public class PdfService(
     IRepository<CustomStory> customStoryRepository,
     IRepository<AIStory> aiStoryRepository,
-    ILogger<PdfService> logger
+    ILogger<PdfService> logger,
+    IHttpClientFactory httpClientFactory
     ) : IPdfService
 {
     public async Task<byte[]> GenerateCustomStoryPdfAsync(string customStoryId, CancellationToken cancellationToken = default)
@@ -149,16 +150,36 @@ public class PdfService(
                             {
                                 try
                                 {
-                                    var imagePath = GetLocalImagePath(item.ImageUrl);
-                                    
-                                    if (!string.IsNullOrEmpty(imagePath) && File.Exists(imagePath))
+                                    // Check if it's an external URL or local path
+                                    if (IsExternalUrl(item.ImageUrl))
                                     {
-                                        column.Item()
-                                            .PaddingTop(10)
-                                            .PaddingBottom(10)
-                                            .AlignCenter()
-                                            .MaxHeight(300)
-                                            .Image(imagePath);
+                                        // Download image from external URL
+                                        var imageBytes = DownloadImageAsync(item.ImageUrl).GetAwaiter().GetResult();
+                                        
+                                        if (imageBytes != null && imageBytes.Length > 0)
+                                        {
+                                            column.Item()
+                                                .PaddingTop(10)
+                                                .PaddingBottom(10)
+                                                .AlignCenter()
+                                                .MaxHeight(300)
+                                                .Image(imageBytes);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        // Load from local storage
+                                        var imagePath = GetLocalImagePath(item.ImageUrl);
+                                        
+                                        if (!string.IsNullOrEmpty(imagePath) && File.Exists(imagePath))
+                                        {
+                                            column.Item()
+                                                .PaddingTop(10)
+                                                .PaddingBottom(10)
+                                                .AlignCenter()
+                                                .MaxHeight(300)
+                                                .Image(imagePath);
+                                        }
                                     }
                                 }
                                 catch (Exception ex)
@@ -192,6 +213,47 @@ public class PdfService(
         }).GeneratePdf();
 
         return pdfBytes;
+    }
+
+    private bool IsExternalUrl(string url)
+    {
+        if (string.IsNullOrEmpty(url))
+            return false;
+
+        return url.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+               url.StartsWith("https://", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private async Task<byte[]?> DownloadImageAsync(string imageUrl)
+    {
+        try
+        {
+            logger.LogInformation("Downloading external image from {ImageUrl}", imageUrl);
+            
+            using var httpClient = httpClientFactory.CreateClient();
+            httpClient.Timeout = TimeSpan.FromSeconds(30);
+            
+            var response = await httpClient.GetAsync(imageUrl);
+            
+            if (!response.IsSuccessStatusCode)
+            {
+                logger.LogWarning("Failed to download image {ImageUrl}. StatusCode: {StatusCode}", 
+                    imageUrl, response.StatusCode);
+                return null;
+            }
+
+            var imageBytes = await response.Content.ReadAsByteArrayAsync();
+            
+            logger.LogInformation("Successfully downloaded image {ImageUrl} ({Size} bytes)", 
+                imageUrl, imageBytes.Length);
+            
+            return imageBytes;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error downloading image from URL: {ImageUrl}", imageUrl);
+            return null;
+        }
     }
 
     private string GetLocalImagePath(string imageUrl)
