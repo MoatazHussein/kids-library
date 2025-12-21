@@ -161,13 +161,17 @@ Story Information:
 Task: Create {slidesCount} slides for the story. Each slide must contain:
 1. A short title (optional) - in Arabic
 2. Story description (2-3 sentences) - in Arabic
-3. Image description (image prompt) - in English - a detailed description of a scene featuring the hero {heroName}
+3. Image description (image prompt) - in English - a detailed description of a scene featuring the main character
 
 Important Rules:
 - The story must be appropriate for children (ages 4-10)
-- Each slide must feature the hero {heroName} in the scene
-- The image prompt must be in English and describe the scene with clear details
-- The image prompt must mention the hero {heroName}, describe the scene and background
+- Each slide must feature the main character in the scene
+- The image prompt must be in ENGLISH ONLY and describe the scene with clear details
+- The image prompt should describe the main character as 'the child', 'the main character', or 'the hero' (do NOT use the actual hero name in the image prompt)
+- CRITICAL: Each image prompt MUST END with this exact sentence: ""Use the face from the provided reference image for the main character, preserving all facial features.""
+- Focus on describing the character's pose, clothing, actions, environment, and scene details
+- Use child-friendly and colorful illustration style descriptions
+- The character's face should be clearly visible and facing forward or at an angle
 - Use an engaging narrative style suitable for children
 
 Return the result in JSON format only like this:
@@ -176,7 +180,7 @@ Return the result in JSON format only like this:
     {{
       ""title"": ""عنوان الشريحة"",
       ""description"": ""وصف القصة بالعربية (2-3 جمل)"",
-      ""imagePrompt"": ""detailed English description of the scene featuring {heroName}, including setting, actions, and atmosphere. Child-friendly and colorful illustration style.""
+      ""imagePrompt"": ""A colorful children's illustration showing the main character [action/pose] in [setting]. The character is wearing [clothing] and [doing activity]. [Describe environment and mood]. Digital art style, vibrant colors, child-friendly. Use the face from the provided reference image for the main character, preserving all facial features.""
     }}
   ]
 }}";

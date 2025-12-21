@@ -43,15 +43,10 @@ public class FalAIService : IFalAIService
             "Generating image with Fal AI. Hero image: {HeroImageUrl}, Original prompt length: {Length} characters",
             heroImageUrl, prompt.Length);
 
-        // Enhance the prompt to explicitly instruct Fal AI to use the hero's face
-        var enhancedPrompt = EnhancePromptWithHeroIdentity(prompt);
-        
-        _logger.LogDebug("Enhanced prompt: {Prompt}", enhancedPrompt);
-
         var request = new FalAIImageRequest
         {
             ImageUrl = heroImageUrl,
-            Prompt = enhancedPrompt,
+            Prompt = prompt,
             Width = _options.DefaultWidth,
             Height = _options.DefaultHeight,
             IdentityStrength = _options.IdentityStrength
@@ -134,12 +129,4 @@ public class FalAIService : IFalAIService
         return imageUrl;
     }
 
-    /// <summary>
-    /// Enhances the prompt to explicitly instruct Fal AI to use the hero's face from the reference image
-    /// </summary>
-    private static string EnhancePromptWithHeroIdentity(string originalPrompt)
-    {
-        // Add clear instruction to use the reference image's face
-        return $"{originalPrompt}. The main character must have the exact same face, features, and appearance as shown in the reference image. Preserve the character's identity from the reference photo throughout the entire scene. Consistent facial features required.";
-    }
 }
