@@ -82,8 +82,9 @@ public class PdfService(
         {
             Title = aiStory.StoryName,
             AuthorName = aiStory.CreatedByUser?.FirstName ?? "AI Author",
-            Description = $"البطل : {aiStory.HeroName}",
-            Items = storyItems
+            HeroName = aiStory.HeroName,
+            Items = storyItems,
+            IsAIStory = true
         };
 
         return GenerateAIStoryLayout(pdfData);
@@ -102,8 +103,121 @@ public class PdfService(
         logger.LogInformation("Generating AI Story PDF with {PageCount} pages for story '{Title}'",
             data.Items.Count, data.Title);
 
-        // In the future, this layout can be customized specifically for AI stories
-        return GeneratePdfDocument(data);
+        var pdfBytes = Document.Create(container =>
+        {
+            container.Page(page =>
+            {
+                page.Size(PageSizes.A4);
+                page.Margin(2, Unit.Centimetre);
+                
+                page.DefaultTextStyle(x => x.FontSize(12).FontFamily("Simplified Arabic"));
+                
+                page.ContentFromRightToLeft();
+
+                // No header for AI stories
+
+                page.Content()
+                    .Column(column =>
+                    {
+                        // COVER PAGE - Use first slide (Index 0)
+                        if (data.Items.Any())
+                        {
+                            var coverSlide = data.Items[0]; // Index 0 = cover
+                            
+                            // Story name in bold
+                            column.Item()
+                                .PaddingTop(40)
+                                .AlignCenter()
+                                .Text(data.Title)
+                                .FontSize(24)
+                                .Bold();
+                            
+                            // Hero name in bold
+                            if (!string.IsNullOrEmpty(data.HeroName))
+                            {
+                                column.Item()
+                                    .PaddingTop(10)
+                                    .AlignCenter()
+                                    .Text($"البطل: {data.HeroName}")
+                                    .FontSize(20)
+                                    .Bold();
+                            }
+                            
+                            // Cover image
+                            if (!string.IsNullOrEmpty(coverSlide.ImageUrl))
+                            {
+                                RenderImage(column, coverSlide.ImageUrl);
+                            }
+                            
+                            // Cover description
+                            if (!string.IsNullOrEmpty(coverSlide.Description))
+                            {
+                                column.Item()
+                                    .PaddingTop(20)
+                                    .AlignRight()
+                                    .Text(coverSlide.Description)
+                                    .FontSize(14);
+                            }
+
+                            // Story slides (Index 1+)
+                            foreach (var item in data.Items.Skip(1))
+                            {
+                                column.Item().PageBreak();
+                                
+                                // Add top spacing for better layout
+                                column.Item().PaddingTop(20);
+                                
+                                // Slide title with decorative border (optional)
+                                if (!string.IsNullOrEmpty(item.Title))
+                                {
+                                    column.Item()
+                                        .PaddingBottom(15)
+                                        .BorderBottom(2)
+                                        .BorderColor("#4A90E2")
+                                        .AlignRight()
+                                        .Text(item.Title)
+                                        .FontSize(20)
+                                        .Bold()
+                                        .FontColor("#2C3E50");
+                                }
+
+                                // Slide image with spacing
+                                if (!string.IsNullOrEmpty(item.ImageUrl))
+                                {
+                                    column.Item().PaddingTop(20).PaddingBottom(20);
+                                    RenderImage(column, item.ImageUrl);
+                                }
+
+                                // Slide description with better spacing and formatting
+                                if (!string.IsNullOrEmpty(item.Description))
+                                {
+                                    column.Item()
+                                        .PaddingTop(20)
+                                        .PaddingLeft(10)
+                                        .PaddingRight(10)
+                                        .AlignRight()
+                                        .Text(item.Description)
+                                        .FontSize(14)
+                                        .LineHeight(1.6f)
+                                        .FontColor("#34495E");
+                                }
+                            }
+                        }
+                    });
+
+                page.Footer()
+                    .AlignCenter()
+                    .Text(x =>
+                    {
+                        x.Span("صفحة ");
+                        x.CurrentPageNumber();
+                        x.Span(" من ");
+                        x.TotalPages();
+                    });
+            });
+        }).GeneratePdf();
+
+        return pdfBytes;
     }
 
     private byte[] GeneratePdfDocument(PdfStoryData data)
@@ -215,6 +329,43 @@ public class PdfService(
         return pdfBytes;
     }
 
+    private void RenderImage(ColumnDescriptor column, string imageUrl)
+    {
+        try
+        {
+            if (IsExternalUrl(imageUrl))
+            {
+                var imageBytes = DownloadImageAsync(imageUrl).GetAwaiter().GetResult();
+                if (imageBytes != null && imageBytes.Length > 0)
+                {
+                    column.Item()
+                        .PaddingTop(10)
+                        .PaddingBottom(10)
+                        .AlignCenter()
+                        .MaxHeight(300)
+                        .Image(imageBytes);
+                }
+            }
+            else
+            {
+                var imagePath = GetLocalImagePath(imageUrl);
+                if (!string.IsNullOrEmpty(imagePath) && File.Exists(imagePath))
+                {
+                    column.Item()
+                        .PaddingTop(10)
+                        .PaddingBottom(10)
+                        .AlignCenter()
+                        .MaxHeight(300)
+                        .Image(imagePath);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to load image {ImageUrl}", imageUrl);
+        }
+    }
+
     private bool IsExternalUrl(string url)
     {
         if (string.IsNullOrEmpty(url))
@@ -301,4 +452,5 @@ public class PdfService(
             return string.Empty;
         }
     }
+
 }

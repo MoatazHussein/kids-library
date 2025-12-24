@@ -20,7 +20,7 @@ public class AIStorySlideConfiguration : IEntityTypeConfiguration<AIStorySlide>
             .HasMaxLength(200);
 
         builder.Property(ais => ais.Description)
-            .HasMaxLength(1000);
+            .HasMaxLength(2500);
 
         builder.Property(ais => ais.ImagePrompt)
             .HasMaxLength(1000);

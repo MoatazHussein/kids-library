@@ -156,16 +156,22 @@ public class OpenAIService : IOpenAIService
 Story Information:
 - Story Title: {storyName}
 - Hero Name: {heroName}
-- Number of Slides: {slidesCount}
 
-Task: Create {slidesCount} slides for the story. Each slide must contain:
-1. A short title (optional) - in Arabic
-2. Story description (2-3 sentences) - in Arabic
+Task: Create EXACTLY {slidesCount} slides total.
+
+Slide Structure:
+- Slide 0: COVER SLIDE (title combining hero name and story title, brief intro, cover illustration)
+- Slides 1 to {slidesCount - 1}: STORY SLIDES (scene title, story content, scene illustration)
+
+Each slide must contain:
+1. Title - in Arabic
+2. Description - in Arabic (2-3 sentences for cover, 4-6 sentences for story slides)
 3. Image description (image prompt) - in English - a detailed description of a scene featuring the main character
 
 Important Rules:
 - The story must be appropriate for children (ages 4-10)
 - Each slide must feature the main character in the scene
+- Make story descriptions LONGER and more detailed (4-6 sentences per story slide)
 - The image prompt must be in ENGLISH ONLY and describe the scene with clear details
 - The image prompt should describe the main character as 'the child', 'the main character', or 'the hero' (do NOT use the actual hero name in the image prompt)
 - CRITICAL: Each image prompt MUST END with this exact sentence: ""Use the face from the provided reference image for the main character, preserving all facial features.""
@@ -174,15 +180,20 @@ Important Rules:
 - The character's face should be clearly visible and facing forward or at an angle
 - Use an engaging narrative style suitable for children
 
-Return the result in JSON format only like this:
-{{
+Return EXACTLY {slidesCount} slides in JSON format like this:
+{{{{
   ""slides"": [
-    {{
-      ""title"": ""عنوان الشريحة"",
-      ""description"": ""وصف القصة بالعربية (2-3 جمل)"",
+    {{{{
+      ""title"": ""{heroName} في {storyName}"",
+      ""description"": ""مقدمة قصيرة عن القصة (2-3 جمل)"",
+      ""imagePrompt"": ""A beautiful children's book cover illustration showing the main character standing heroically. [Describe the hero's appearance, clothing, and background]. Vibrant colors, professional book cover style. Use the face from the provided reference image for the main character, preserving all facial features.""
+    }}}},
+    {{{{
+      ""title"": ""عنوان الشريحة الأولى"",
+      ""description"": ""وصف القصة بالعربية (4-6 جمل). اجعل الوصف طويلاً ومفصلاً وجذاباً للأطفال."",
       ""imagePrompt"": ""A colorful children's illustration showing the main character [action/pose] in [setting]. The character is wearing [clothing] and [doing activity]. [Describe environment and mood]. Digital art style, vibrant colors, child-friendly. Use the face from the provided reference image for the main character, preserving all facial features.""
-    }}
+    }}}}
   ]
-}}";
+}}}}";
     }
 }

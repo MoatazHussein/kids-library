@@ -55,9 +55,9 @@ public class GenerateAIStoryCommandHandler(
             throw new AppException($"You have reached the limit of {settings.AIStoryLimitCount} AI stories every {settings.AIStoryLimitDays} days.");
         }
 
-        // 3. Generate random slides count (5-8)
+        // 3. Generate random slides 
         var random = new Random();
-        var slidesCount = random.Next(5, 9); // 5 to 8 inclusive
+        var slidesCount = random.Next(5, 9); 
 
         logger.LogDebug(
             "Starting AI story generation. CustomStoryId={CustomStoryId}, StoryName={StoryName}, HeroName={HeroName}, SlidesCount={SlidesCount}",
@@ -91,7 +91,7 @@ public class GenerateAIStoryCommandHandler(
             var slideDto = storyResponse.Slides[i];
             var slide = new AIStorySlide
             {
-                Index = i + 1,
+                Index = i,
                 Title = slideDto.Title,
                 Description = slideDto.Description,
                 ImagePrompt = slideDto.ImagePrompt,
