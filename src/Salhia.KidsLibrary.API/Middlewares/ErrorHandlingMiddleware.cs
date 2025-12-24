@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Salhia.KidsLibrary.API.Models;
 using Salhia.KidsLibrary.Domain.Exceptions;
+using System.Text.Json;
 
 namespace Salhia.KidsLibrary.API.Middlewares;
 
@@ -9,47 +11,39 @@ public class ErrorHandlingMiddleware(ILogger<ErrorHandlingMiddleware> logger) : 
     {
         try
         {
-            await next.Invoke(context);
-        }
-        catch (NotFoundException notFound)
-        {
-            context.Response.StatusCode = 404;
-            await context.Response.WriteAsync(notFound.Message);
-
-            logger.LogWarning(notFound.Message);
-        }
-        catch (UnAuthorizedAccessException unAuthorizedAccess)
-        {
-            context.Response.StatusCode = 401;
-            await context.Response.WriteAsync(unAuthorizedAccess.Message);
-        }
-        catch (AlreadyExistsException alreadyExists)
-        {
-            context.Response.StatusCode = 409;
-            await context.Response.WriteAsync(alreadyExists.Message);
-        }
-        catch (AppException ex)
-        {
-            context.Response.StatusCode = 500;
-            await context.Response.WriteAsync(ex.Message);
-        }
-        catch (DbUpdateException ex) 
-        {
-            logger.LogError(ex, ex.Message);
-            context.Response.StatusCode = 500;
-            await context.Response.WriteAsync("Database update failed");
-        }
-        catch (BusinessRuleException ex) 
-        {
-            context.Response.StatusCode = ex.StatusCode;
-            await context.Response.WriteAsync(ex.Message);
+            await next(context);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, ex.Message);
+            context.Response.ContentType = "application/json; charset=utf-8";
 
-            context.Response.StatusCode = 500;
-            await context.Response.WriteAsync("Something went wrong");
+            await HandleExceptionAsync(context, ex, logger);
         }
+    }
+
+    private static async Task HandleExceptionAsync(
+        HttpContext context,
+        Exception ex,
+        ILogger logger)
+    {
+        var (statusCode, message, errorCode) = ex switch
+        {
+            BaseException e => (e.StatusCode, e.Message, e.ErrorCode),
+            DbUpdateException => (500, "Database update failed", "DatabaseError"),
+            _ => (500, "Something went wrong", "InternalServerError")
+        };
+
+        context.Response.StatusCode = statusCode;
+
+        var apiErrorResponse = new ApiErrorResponse
+        {
+            Code = errorCode,
+            Message = message,
+            StatusCode = statusCode
+        };
+
+        await context.Response.WriteAsync(
+            JsonSerializer.Serialize(apiErrorResponse)
+        );
     }
 }

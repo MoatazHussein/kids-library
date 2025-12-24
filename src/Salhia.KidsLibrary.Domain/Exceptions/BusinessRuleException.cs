@@ -1,22 +1,15 @@
 ﻿namespace Salhia.KidsLibrary.Domain.Exceptions
 {
-    public class BusinessRuleException : Exception
+    public class BusinessRuleException : BaseException
     {
-        public int StatusCode { get; }
-        public string? ErrorCode { get; }
-
         public BusinessRuleException(string message, int statusCode = 422, string? errorCode = null)
-            : base(message)
+            : base(message, errorCode ?? "BusinessRuleViolation", statusCode)
         {
-            StatusCode = statusCode;
-            ErrorCode = errorCode;
         }
 
         public BusinessRuleException(string message, Exception innerException, int statusCode = 422, string? errorCode = null)
-            : base(message, innerException)
+            : base(message, errorCode ?? "BusinessRuleViolation", statusCode)
         {
-            StatusCode = statusCode;
-            ErrorCode = errorCode;
         }
     }
 }

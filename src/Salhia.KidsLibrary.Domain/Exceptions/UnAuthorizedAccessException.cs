@@ -1,6 +1,6 @@
 ﻿namespace Salhia.KidsLibrary.Domain.Exceptions;
 public class UnAuthorizedAccessException(string message)
-    : Exception(message)
+    : BaseException(message, "Unauthorized", 401)
 {
 }
 

@@ -1,6 +1,6 @@
 ﻿namespace Salhia.KidsLibrary.Domain.Exceptions;
 
 public class AlreadyExistsException(string resourceType)
-    : Exception(resourceType + " Already Exists")
+    : BaseException(resourceType + " Already Exists", "AlreadyExists", 409)
 {
 }
