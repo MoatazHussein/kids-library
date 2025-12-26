@@ -156,12 +156,11 @@ public class OpenAIService : IOpenAIService
 Story Information:
 - Story Title: {storyName}
 - Hero Name: {heroName}
+- Required Slides: {slidesCount}
 
 Task: Create EXACTLY {slidesCount} slides total.
-
-Slide Structure:
-- Slide 0: COVER SLIDE (title combining hero name and story title, brief intro, cover illustration)
-- Slides 1 to {slidesCount - 1}: STORY SLIDES (scene title, story content, scene illustration)
+- First slide (index 0): Cover slide with title, brief intro, and cover illustration
+- Remaining slides: Story scenes with detailed content and illustrations
 
 Each slide must contain:
 1. Title - in Arabic
@@ -180,7 +179,7 @@ Important Rules:
 - The character's face should be clearly visible and facing forward or at an angle
 - Use an engaging narrative style suitable for children
 
-Return EXACTLY {slidesCount} slides in JSON format like this:
+Return EXACTLY {slidesCount} slides in this JSON format:
 {{{{
   ""slides"": [
     {{{{

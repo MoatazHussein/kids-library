@@ -167,7 +167,8 @@ public class PdfService(
                                 // Add top spacing for better layout
                                 column.Item().PaddingTop(20);
                                 
-                                // Slide title with decorative border (optional)
+                                // Slide title with decorative border 
+                                /*
                                 if (!string.IsNullOrEmpty(item.Title))
                                 {
                                     column.Item()
@@ -180,6 +181,7 @@ public class PdfService(
                                         .Bold()
                                         .FontColor("#2C3E50");
                                 }
+                                */
 
                                 // Slide image with spacing
                                 if (!string.IsNullOrEmpty(item.ImageUrl))

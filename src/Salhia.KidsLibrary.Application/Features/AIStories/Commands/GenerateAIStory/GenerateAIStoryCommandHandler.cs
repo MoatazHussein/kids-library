@@ -57,19 +57,26 @@ public class GenerateAIStoryCommandHandler(
 
         // 3. Generate random slides 
         var random = new Random();
-        var slidesCount = random.Next(5, 9); 
+        var requestedSlidesCount = random.Next(5, 9); 
 
         logger.LogDebug(
-            "Starting AI story generation. CustomStoryId={CustomStoryId}, StoryName={StoryName}, HeroName={HeroName}, SlidesCount={SlidesCount}",
-            request.CustomStoryId, request.StoryName, request.HeroName, slidesCount);
+            "Starting AI story generation. CustomStoryId={CustomStoryId}, StoryName={StoryName}, HeroName={HeroName}, RequestedSlidesCount={RequestedSlidesCount}",
+            request.CustomStoryId, request.StoryName, request.HeroName, requestedSlidesCount);
 
-        // 4. Create AIStory record
+        // 4. Call OpenAI to generate story content FIRST
+        var storyResponse = await openAIService.GenerateStoryWithSlidesAsync(
+            request.StoryName,
+            request.HeroName,
+            requestedSlidesCount,
+            cancellationToken);
+
+        // 5. Create AIStory record with ACTUAL slides count from OpenAI
         var aiStory = new AIStory
         {
             StoryName = request.StoryName,
             HeroName = request.HeroName,
             HeroImageUrl = request.HeroImageUrl,
-            SlidesCount = slidesCount,
+            SlidesCount = storyResponse.Slides.Count, 
             CustomStoryId = request.CustomStoryId,
             CreatedBy = currentUserId,
             CreatedAt = DateTime.UtcNow
@@ -77,14 +84,7 @@ public class GenerateAIStoryCommandHandler(
 
         await aiStoryRepository.AddAsync(aiStory, cancellationToken);
 
-        // 4. Call OpenAI to generate story content
-        var storyResponse = await openAIService.GenerateStoryWithSlidesAsync(
-            request.StoryName,
-            request.HeroName,
-            slidesCount,
-            cancellationToken);
-
-        // 5. Create AIStorySlide records with status "Pending"
+        // 6. Create AIStorySlide records with status "Pending"
         var slides = new List<AIStorySlide>();
         for (int i = 0; i < storyResponse.Slides.Count; i++)
         {
@@ -106,7 +106,7 @@ public class GenerateAIStoryCommandHandler(
             await aiStorySlideRepository.AddAsync(slide, cancellationToken);
         }
 
-        // 6. Save all changes
+        // 7. Save all changes
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         logger.LogInformation(
