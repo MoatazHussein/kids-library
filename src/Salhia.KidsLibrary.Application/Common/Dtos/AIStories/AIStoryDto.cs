@@ -18,7 +18,6 @@ public class AIStorySlideDto
     public int Index { get; set; }
     public string? Title { get; set; }
     public string Description { get; set; } = default!;
-    public string ImagePrompt { get; set; } = default!;
     public string ImageUrl { get; set; } = default!;
     public string Status { get; set; } = default!;
     public DateTime CreatedAt { get; set; }
