@@ -20,8 +20,12 @@ public class LoginCommandHandler(IUserService userService, IJwtService jwtServic
         if (isDisabled)
             throw new UnAuthorizedAccessException("Your account has been disabled. Please contact an administrator.");
 
-        var ok = await userService.ValidateCredentialsAsync(request.Email, request.Password, lockoutOnFailure: true, cancellationToken);
-        if (!ok)
+        var signInResult = await userService.ValidateCredentialsAsync(request.Email, request.Password, lockoutOnFailure: true, cancellationToken);
+        
+        if (signInResult.IsLockedOut)
+            throw new UnAuthorizedAccessException("Your account has been locked due to multiple failed login attempts. Please try again later.");
+        
+        if (!signInResult.Succeeded)
             throw new UnAuthorizedAccessException("Invalid credentials.");
 
         var roles = await userService.GetRolesAsync(user.Id, cancellationToken);

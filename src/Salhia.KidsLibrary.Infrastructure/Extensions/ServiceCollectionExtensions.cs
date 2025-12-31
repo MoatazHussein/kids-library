@@ -46,7 +46,13 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<IJwtService, JwtService>();
 
-        services.AddIdentityCore<AppUser>()
+        services.AddIdentityCore<AppUser>(options =>
+        {
+            // Lockout settings
+            options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5); 
+            options.Lockout.MaxFailedAccessAttempts = 5;
+            options.Lockout.AllowedForNewUsers = true; 
+        })
                 .AddRoles<AppRole>()
                 .AddEntityFrameworkStores<AppDbContext>()
                 .AddSignInManager()

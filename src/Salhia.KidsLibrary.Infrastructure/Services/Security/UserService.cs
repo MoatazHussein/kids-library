@@ -271,12 +271,12 @@ public sealed class UserService(
     }
 
     // -------- Auth / credentials --------
-    public async Task<bool> ValidateCredentialsAsync(string email, string password, bool lockoutOnFailure, CancellationToken ct = default)
+    public async Task<SignInResult> ValidateCredentialsAsync(string email, string password, bool lockoutOnFailure, CancellationToken ct = default)
     {
         var user = await userManager.FindByEmailAsync(email);
-        if (user is null) return false;
+        if (user is null) return SignInResult.Failed;
         var result = await signIn.CheckPasswordSignInAsync(user, password, lockoutOnFailure);
-        return result.Succeeded;
+        return result;
     }
 
     // -------- User type --------

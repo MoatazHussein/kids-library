@@ -30,7 +30,7 @@ public interface IUserService
     Task<string?> GenerateEmailConfirmationTokenAsync(string email, CancellationToken ct = default);
     Task<bool> IsEmailConfirmedAsync(string email, CancellationToken ct = default);
     Task<string?> GeneratePasswordResetTokenAsync(string userId, CancellationToken ct = default);
-    Task<bool> ValidateCredentialsAsync(string email, string password, bool lockoutOnFailure, CancellationToken ct = default);
+    Task<SignInResult> ValidateCredentialsAsync(string email, string password, bool lockoutOnFailure, CancellationToken ct = default);
     Task<(int UserTypeValue, string UserTypeName)> GetUserTypeAsync(string userId, CancellationToken ct = default);
     Task<bool> ResetPasswordAsync(string email, string token, string newPassword, CancellationToken ct = default);
     Task<bool> RemoveFromRoleAsync(string email, string roleName, CancellationToken ct = default);
