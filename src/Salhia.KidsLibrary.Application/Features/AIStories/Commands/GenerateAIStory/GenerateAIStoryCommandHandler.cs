@@ -29,7 +29,7 @@ public class GenerateAIStoryCommandHandler(
         if (customStory == null)
         {
             logger.LogWarning("CustomStory with Id {CustomStoryId} not found", request.CustomStoryId);
-            throw new AppException($"CustomStory with Id {request.CustomStoryId} not found");
+            throw new AppException($"CustomStory with Id {request.CustomStoryId} not found", "CustomStoryNotFound");
         }
 
         // 2. Check Rate Limit
@@ -40,7 +40,7 @@ public class GenerateAIStoryCommandHandler(
 
         if (settings is null)
         {
-            throw new AppException("System settings not configured for AI story limits");
+            throw new AppException("System settings not configured for AI story limits", "SystemSettingsNotConfigured");
         }
 
         var limitDate = DateTime.UtcNow.AddDays(-settings.AIStoryLimitDays);
@@ -52,7 +52,7 @@ public class GenerateAIStoryCommandHandler(
         {
             logger.LogWarning("User {UserId} exceeded AI story limit. Count: {Count}, Limit: {Limit}",
                 currentUserId, recentStoriesCount, settings.AIStoryLimitCount);
-            throw new AppException($"You have reached the limit of {settings.AIStoryLimitCount} AI stories every {settings.AIStoryLimitDays} days.");
+            throw new AppException($"You have reached the limit of {settings.AIStoryLimitCount} AI stories every {settings.AIStoryLimitDays} days.", "AIStoryLimitExceeded");
         }
 
         // 3. Generate random slides 

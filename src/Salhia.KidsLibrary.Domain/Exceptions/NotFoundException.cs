@@ -1,5 +1,8 @@
 ﻿namespace Salhia.KidsLibrary.Domain.Exceptions;
-public class NotFoundException(string resourceType, string resourceIdentifier)
-    : BaseException($"{resourceType} with : {resourceIdentifier} doesn't exist", "NotFound", 404)
+public class NotFoundException : BaseException
 {
+    public NotFoundException(string resourceType, string resourceIdentifier, string? errorCode = null)
+        : base($"{resourceType} with : {resourceIdentifier} doesn't exist", errorCode ?? "NotFound", 404)
+    {
+    }
 }

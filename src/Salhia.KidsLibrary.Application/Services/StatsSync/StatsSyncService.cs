@@ -129,7 +129,7 @@ public class StatsSyncService(
         if (story == null)
         {
             logger.LogWarning("Story {StoryId} not found for stats sync", storyId);
-            throw new AppException($"Story with ID {storyId} not found");
+            throw new AppException($"Story with ID {storyId} not found", "StoryNotFound");
         }
 
         var stats = await statsRepository.FirstOrDefaultAsync(

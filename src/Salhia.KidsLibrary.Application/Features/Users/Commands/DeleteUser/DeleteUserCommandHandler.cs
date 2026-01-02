@@ -20,7 +20,7 @@ public class DeleteUserCommandHandler(
         var currentUserId = currentUserService.UserId;
         if (currentUserId == request.UserId)
         {
-            throw new UnAuthorizedAccessException("You cannot delete your own account");
+            throw new UnAuthorizedAccessException("You cannot delete your own account", "CannotDeleteOwnAccount");
         }
 
         // Check if user exists
@@ -34,7 +34,7 @@ public class DeleteUserCommandHandler(
         
         if (!success)
         {
-            throw new AppException("Failed to delete user");
+            throw new AppException("Failed to delete user", "UserDeletionFailed");
         }
 
         logger.LogInformation("User {UserId} has been deleted successfully", request.UserId);

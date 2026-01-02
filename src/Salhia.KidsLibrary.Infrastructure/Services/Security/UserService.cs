@@ -24,7 +24,7 @@ public sealed class UserService(
         // Check if email already exists
         var existingEmail = await userManager.FindByEmailAsync(request.Email);
         if (existingEmail is not null)
-            throw new AlreadyExistsException(request.Email);
+            throw new AlreadyExistsException(request.Email, "EmailAlreadyExists");
 
         // Check if phone number already exists
         if (!string.IsNullOrWhiteSpace(request.PhoneNumber))
@@ -32,7 +32,7 @@ public sealed class UserService(
             var existingPhone = await userManager.Users
                 .FirstOrDefaultAsync(u => u.PhoneNumber == request.PhoneNumber, ct);
             if (existingPhone is not null)
-                throw new AlreadyExistsException($"Phone number {request.PhoneNumber}");
+                throw new AlreadyExistsException($"Phone number {request.PhoneNumber}", "PhoneNumberAlreadyExists");
         }
 
         var user = new AppUser

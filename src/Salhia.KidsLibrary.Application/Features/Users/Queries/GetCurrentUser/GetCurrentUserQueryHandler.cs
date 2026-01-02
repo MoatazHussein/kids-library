@@ -21,7 +21,7 @@ public class GetCurrentUserQueryHandler(
             cancellationToken);
 
         if (user == null)
-            throw new UnAuthorizedAccessException("User is not authenticated.");
+            throw new UnAuthorizedAccessException("User is not authenticated.", "UserNotAuthenticated");
 
         var dto = mapper.Map<UserDto>(user);
 

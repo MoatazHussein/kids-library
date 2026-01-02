@@ -28,7 +28,7 @@ public class UpdateMasterStoryCommandHandler(
         var isAdmin = currentUserService.IsInRole(UserRoles.Admin);
 
         if (masterStory.CreatedBy != currentUserId && !isAdmin)
-            throw new UnAuthorizedAccessException("You don't have permission to update this story");
+            throw new UnAuthorizedAccessException("You don't have permission to update this story", "UnauthorizedStoryUpdate");
 
         // Verify that the StoryCategory exists
         var categoryExists = await storyCategoryRepository.GetByIdAsync(request.StoryCategoryId, cancellationToken);

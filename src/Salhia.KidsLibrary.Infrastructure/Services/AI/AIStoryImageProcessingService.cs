@@ -77,13 +77,13 @@ public class AIStoryImageProcessingService : IAIStoryImageProcessingService
         if (slide == null)
         {
             _logger.LogWarning("Slide {SlideId} not found", slideId);
-            throw new AppException($"Slide with ID {slideId} not found");
+            throw new AppException($"Slide with ID {slideId} not found", "SlideNotFound");
         }
 
         if (slide.Status == AIStorySlideStatus.Ready)
         {
             _logger.LogWarning("Slide {SlideId} is already ready", slideId);
-            throw new AppException("This slide has already been generated successfully");
+            throw new AppException("This slide has already been generated successfully", "SlideAlreadyGenerated");
         }
 
         // Reset status to Generating

@@ -21,7 +21,7 @@ public class ApproveMasterStoryCommandHandler(
         // Authorization: Only admin can approve/disapprove
         var isAdmin = currentUserService.IsInRole(UserRoles.Admin);
         if (!isAdmin)
-            throw new UnAuthorizedAccessException("Only administrators can approve or disapprove stories");
+            throw new UnAuthorizedAccessException("Only administrators can approve or disapprove stories", "UnauthorizedStoryApproval");
 
         var masterStory = await masterStoryRepository.GetByIdAsync(request.Id, cancellationToken);
         

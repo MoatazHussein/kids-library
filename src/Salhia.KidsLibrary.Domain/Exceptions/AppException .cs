@@ -2,6 +2,7 @@
 
 public class AppException : BaseException
 {
-    public AppException(string message) : base(message, "InternalError", 500) { }
-
+    public AppException(string message, string? errorCode = null) 
+        : base(message, errorCode ?? "InternalError", 500) 
+    { }
 }

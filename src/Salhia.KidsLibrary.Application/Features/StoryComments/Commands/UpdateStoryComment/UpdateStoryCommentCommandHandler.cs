@@ -26,7 +26,7 @@ public class UpdateStoryCommentCommandHandler(
         var currentUserId = currentUserService.UserId;
 
         if (comment.CreatedBy != currentUserId)
-            throw new UnAuthorizedAccessException("You don't have permission to update this comment");
+            throw new UnAuthorizedAccessException("You don't have permission to update this comment", "UnauthorizedCommentUpdate");
         
         mapper.Map(request, comment);
         

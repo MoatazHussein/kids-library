@@ -25,7 +25,7 @@ public class DeleteMasterStoryCommandHandler(
         var isAdmin = currentUserService.IsInRole(UserRoles.Admin);
 
         if (masterStory.CreatedBy != currentUserId && !isAdmin)
-            throw new UnAuthorizedAccessException("You don't have permission to delete this story");
+            throw new UnAuthorizedAccessException("You don't have permission to delete this story", "UnauthorizedStoryDeletion");
         
         await masterStoryRepository.DeleteAsync(masterStory);
         await unitOfWork.SaveChangesAsync(cancellationToken);

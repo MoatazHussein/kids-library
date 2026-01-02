@@ -49,7 +49,7 @@ public class AddRatingCommandHandler(
 
         if (existingRatings.Any())
         {
-            throw new AppException("You have already rated this story. Use update instead.");
+            throw new AppException("You have already rated this story. Use update instead.", "DuplicateRating");
         }
 
         // Create new rating

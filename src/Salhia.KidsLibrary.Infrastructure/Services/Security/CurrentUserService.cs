@@ -16,7 +16,7 @@ public class CurrentUserService(IHttpContextAccessor httpContextAccessor) : ICur
 
             if (string.IsNullOrEmpty(userId))
             {
-               throw new UnAuthorizedAccessException("User is not authenticated.");
+               throw new UnAuthorizedAccessException("User is not authenticated.", "UserNotAuthenticated");
             }
 
             return userId;
@@ -33,7 +33,7 @@ public class CurrentUserService(IHttpContextAccessor httpContextAccessor) : ICur
 
             if (string.IsNullOrEmpty(userName))
             {
-                throw new UnAuthorizedAccessException("User is not authenticated or username is missing.");
+                throw new UnAuthorizedAccessException("User is not authenticated or username is missing.", "UsernameNotFound");
             }
 
             return userName;
@@ -49,7 +49,7 @@ public class CurrentUserService(IHttpContextAccessor httpContextAccessor) : ICur
 
             if (string.IsNullOrEmpty(userEmail))
             {
-                throw new UnAuthorizedAccessException("User is not authenticated or username is missing.");
+                throw new UnAuthorizedAccessException("User is not authenticated or username is missing.", "EmailNotFound");
             }
 
             return userEmail;

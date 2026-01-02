@@ -25,7 +25,7 @@ public class DeleteStoryCommentCommandHandler(
         var isAdmin = currentUserService.IsInRole(UserRoles.Admin);
 
         if (comment.CreatedBy != currentUserId && !isAdmin)
-            throw new UnAuthorizedAccessException("You don't have permission to delete this comment");
+            throw new UnAuthorizedAccessException("You don't have permission to delete this comment", "UnauthorizedCommentDeletion");
         
         await commentRepository.DeleteAsync(comment);
         await unitOfWork.SaveChangesAsync(cancellationToken);
