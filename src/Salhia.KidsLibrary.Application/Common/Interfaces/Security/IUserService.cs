@@ -27,7 +27,7 @@ public interface IUserService
     Task<PagedResult<AppUser>> GetPagedAsync(int pageNumber, int pageSize, string? search = null, UserType? userType = null, Expression<Func<AppUser, object>>[]? includes = null,
   CancellationToken ct = default);
     Task<bool> ConfirmEmailAsync(string userId, string token, CancellationToken ct = default);
-    Task<string?> GenerateEmailConfirmationTokenAsync(string email, CancellationToken ct = default);
+    Task<string?> GenerateEmailConfirmationTokenAsync(string userId, CancellationToken ct = default);
     Task<bool> IsEmailConfirmedAsync(string email, CancellationToken ct = default);
     Task<string?> GeneratePasswordResetTokenAsync(string userId, CancellationToken ct = default);
     Task<SignInResult> ValidateCredentialsAsync(string email, string password, bool lockoutOnFailure, CancellationToken ct = default);

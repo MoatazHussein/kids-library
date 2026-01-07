@@ -15,9 +15,14 @@ public class ForgotPasswordCommandHandler(
     public async Task<bool> Handle(ForgotPasswordCommand request, CancellationToken cancellationToken)
     {
         var user = await userService.FindByEmailAsync(request.Email, cancellationToken);
-        if (user is null || !await userService.IsEmailConfirmedAsync(request.Email, cancellationToken))
+        if (user is null)
         {
-            throw new NotFoundException("User", request.Email);
+            throw new NotFoundException("User", request.Email, "USER_NOT_FOUND");
+        }
+
+        if (!await userService.IsEmailConfirmedAsync(request.Email, cancellationToken))
+        {
+            throw new BusinessRuleException("Email is not confirmed. Please confirm your email before requesting a password reset.", 400, "EMAIL_NOT_CONFIRMED");
         }
 
         var token = await userService.GeneratePasswordResetTokenAsync(user.Id, cancellationToken);

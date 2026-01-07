@@ -6,16 +6,17 @@ using Salhia.KidsLibrary.Application.Features.Users.Commands.DisableUser;
 using Salhia.KidsLibrary.Application.Features.Users.Commands.EnableUser;
 using Salhia.KidsLibrary.Application.Features.Users.Commands.ForgotPassword;
 using Salhia.KidsLibrary.Application.Features.Users.Commands.Login;
+using Salhia.KidsLibrary.Application.Features.Users.Commands.RegisterUser;
+using Salhia.KidsLibrary.Application.Features.Users.Commands.ResendConfirmationEmail;
 using Salhia.KidsLibrary.Application.Features.Users.Commands.ResetPassword;
 using Salhia.KidsLibrary.Application.Features.Users.Commands.UnassignUserRole;
+using Salhia.KidsLibrary.Application.Features.Users.Commands.UpdateUser;
 using Salhia.KidsLibrary.Application.Features.Users.Queries.GetAllUsers;
 using Salhia.KidsLibrary.Application.Features.Users.Queries.GetCurrentUser;
 using Salhia.KidsLibrary.Domain.Constants;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Salhia.KidsLibrary.Application.Features.Users.Commands.RegisterUser;
-using Salhia.KidsLibrary.Application.Features.Users.Commands.UpdateUser;
 
 namespace Salhia.KidsLibrary.API.Controllers;
 
@@ -157,6 +158,13 @@ public class IdentityController(IMediator mediator, IConfiguration configuration
 
         //return Ok("Email confirmed successfully.");
         return Redirect($"{configuration["App:FrontendBaseUrl"]}/successful_verification?email={email}&token={token}");
+    }
+
+    [HttpPost("resend-confirmation-email")]
+    public async Task<IActionResult> ResendConfirmationEmail([FromBody] ResendConfirmationEmailCommand command)
+    {
+        await mediator.Send(command);
+        return Ok("A new confirmation email has been sent to your email address.");
     }
 
 
